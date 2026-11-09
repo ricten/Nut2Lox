@@ -37,7 +37,7 @@ for f in "$STAGE"/*.sh "$STAGE"/bin/*.sh "$STAGE"/cron/cron.01min "$STAGE"/daemo
 done
 
 OUT="$PWD/nut-$VER.zip"
-rm -f "$OUT"
+rm -f nut-*.zip      # alte Installer entfernen, nur der aktuelle bleibt
 "$PY" - "$OUT" "$STAGE" <<'PYEOF'
 import os, sys, zipfile
 out, root = sys.argv[1], sys.argv[2]
