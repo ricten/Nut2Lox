@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.3.1] – 2026-11-09
+
+### Behoben
+- **Spalte „Aktiv“ bei den NUT-Servern war leer:** Die Kontrollkästchen in der Tabelle wurden von der LoxBerry-Oberfläche (jQuery Mobile) ausgeblendet. Ein Server ließ sich dadurch nicht aktivieren und wurde nie abgefragt. Die Kontrollkästchen sind jetzt sichtbar (`data-role="none"`).
+
 ## [0.3.0] – 2026-11-09
 
 ### Hinzugefügt

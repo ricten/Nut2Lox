@@ -86,6 +86,7 @@ LBWeb::lbheader('NUT USV ' . AppVersion::CURRENT, '', '');
  .nut pre { background:#f4f4f4; color:#222; padding:8px; overflow:auto; max-height:420px; }
  .nut .ok { color:#2a8a2a; font-weight:bold; } .nut .fehler { color:#c0392b; font-weight:bold; }
  .nut .hinweis { color:#666; font-size:90%; }
+ .nut input.nut-chk { display:inline-block; position:static; opacity:1; width:22px; height:22px; margin:4px; }
 </style>
 <div class="nut">
 <div class="nut-tabs">
@@ -115,7 +116,7 @@ foreach ($tabs as $k => $t) {
 <tr><th>Aktiv</th><th>Name im Topic</th><th>Host/IP</th><th>Port</th><th>USV-Name</th><th>Benutzer</th><th>Passwort</th></tr>
 <?php foreach ($nut['server'] as $i => $s) { ?>
 <tr>
- <td><input type="checkbox" name="srv[<?= $i ?>][aktiv]" value="1" <?= !empty($s['aktiv']) ? 'checked' : '' ?>></td>
+ <td><input type="checkbox" data-role="none" class="nut-chk" name="srv[<?= $i ?>][aktiv]" value="1" <?= !empty($s['aktiv']) ? 'checked' : '' ?>></td>
  <td><input type="text" name="srv[<?= $i ?>][alias]" value="<?= h($s['alias']) ?>" size="10"></td>
  <td><input type="text" name="srv[<?= $i ?>][host]" value="<?= h($s['host']) ?>" size="16"></td>
  <td><input type="number" name="srv[<?= $i ?>][port]" value="<?= (int)$s['port'] ?>" style="width:80px"></td>
