@@ -1,6 +1,6 @@
 # NUT USV – LoxBerry-Plugin
 
-**Version 0.1.0** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
+**Version 0.1.1** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
 
 Liest USV-Werte von NUT-Servern (Port 3493) und veröffentlicht sie per MQTT am LoxBerry-Broker (→ MQTT-Gateway → Loxone).
 Optional richtet das Plugin auf dem LoxBerry selbst einen NUT-Server für eine USB-USV ein. Ersetzt den ioBroker-Adapter `nut`.
@@ -18,7 +18,7 @@ Optional richtet das Plugin auf dem LoxBerry selbst einen NUT-Server für eine U
 Befehle (gesperrt bis zur Freigabe): `nut/befehl/<name>/beeper_toggle` = 1, Quittung unter `…/quittung`.
 
 ## Lokaler NUT-Server
-`bin/nut-apply.sh` (root, per sudo) schreibt `/etc/nut/{nut.conf,ups.conf,upsd.conf,upsd.users}`. Betriebsart `netserver` ohne upsmon: der LoxBerry fährt bei leerer Batterie **nicht** selbst herunter.
+`bin/nut-apply.sh` (root, per sudo – die Erlaubnis legt die Installation unter `/etc/sudoers.d/` an) schreibt `/etc/nut/{nut.conf,ups.conf,upsd.conf,upsd.users}`. Betriebsart `netserver` ohne upsmon: der LoxBerry fährt bei leerer Batterie **nicht** selbst herunter.
 Fremde Dateien werden einmalig als `*.vor-nut-plugin` gesichert. Deinstallation lässt `/etc/nut` und die Pakete bestehen.
 
 ## Entwicklung

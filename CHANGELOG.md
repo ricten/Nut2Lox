@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.1.1] – 2026-11-09
+
+### Behoben
+- **Lokalen NUT-Server einrichten scheiterte mit „sudo: a password is required“:** Der Benutzer loxberry darf kein sudo ohne Passwort. `postroot.sh` (läuft als root) legt jetzt `/etc/sudoers.d/nut-plugin-<Ordner>` an, die genau `nut-apply.sh apply` und `nut-apply.sh scan` erlaubt (vorher mit `visudo -c` geprüft). Die Deinstallation entfernt die Datei. Die Oberfläche weist bei fehlender Erlaubnis darauf hin.
+
 ## [0.1.0] – 2026-11-09
 
 ### Hinzugefügt
