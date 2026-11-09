@@ -7,7 +7,7 @@ Ausgabe:
   docs/logo/logo_loxberry.png                 gruener, runder LoxBerry-Stil
   nut2lox/icons/icon_{64,128,256,512}.png     dasselbe als Plugin-Icons
 
-Links eine USV (Batterie mit Blitz, Steckdosen), rechts der Miniserver (eigene, vereinfachte Darstellung
+Links eine Rack-USV (19 Zoll, Display mit Blitz), rechts der Miniserver (eigene, vereinfachte Darstellung
 ohne Herstellerlogo, wie bei Senec2Lox), dazwischen ein Pfeil, darunter der Name "Nut2Lox".
 """
 import os
@@ -22,10 +22,10 @@ LABEL = "Nut2Lox"
 LABEL_WIDTH = 300      # Breite der Beschriftung im 512er-Raster
 LABEL_BASE = 352       # Grundlinie
 
-USV = (112, 122, 200, 262)                 # x1, y1, x2, y2 (USV-Gehaeuse)
+USV = (98, 154, 216, 238)                  # x1, y1, x2, y2 (Rack-USV: zwei Hoeheneinheiten)
 MINISERVER = (270, 152, 426, 240)          # x1, y1, x2, y2 (gruenes Gehaeuse, Draufsicht)
 LINK_Y = 196                               # Verbindungslinie (Mitte beider Geraete)
-LINK_X = (208, 258)
+LINK_X = (226, 258)
 
 
 def fit_bolt(points, center, scale):
@@ -35,7 +35,7 @@ def fit_bolt(points, center, scale):
     return [(round(center[0] + (x - ox) * scale, 1), round(center[1] + (y - oy) * scale, 1)) for x, y in points]
 
 
-BOLT = fit_bolt([(222, 168), (184, 214), (208, 214), (196, 254), (244, 200), (219, 200)], (156, 176), 0.42)
+BOLT = fit_bolt([(222, 168), (184, 214), (208, 214), (196, 254), (244, 200), (219, 200)], (150, 174), 0.30)
 
 
 def miniserver_shapes():
@@ -71,29 +71,38 @@ def miniserver_shapes():
 
 
 def usv_shapes():
-    """USV: weisses Gehaeuse, oben Statusleiste, Batterie mit Blitz, unten zwei Steckdosen und Lueftungsschlitze."""
+    """Rack-USV (19-Zoll, zwei Einheiten): oben die USV mit Display, Einschalter und Lueftungsschlitzen,
+    unten ein Batteriemodul mit Griff und Lueftungsschlitzen. Befestigungsohren mit Schraubenloechern an den Seiten."""
     x1, y1, x2, y2 = USV
     white = (255, 255, 255, 255)
     g = (63, 125, 16, 255)
-    gl = (63, 125, 16, 140)
+    gl = (63, 125, 16, 150)
+    lcd = (38, 70, 20, 255)
     sh = []
-    sh.append(("rrect", x1, y1, x2, y2, 14, white))                                   # Gehaeuse
-    sh.append(("rrect", x1 + 14, y1 + 12, x2 - 14, y1 + 20, 4, g))                   # Statusleiste
-    sh.append(("circle", x2 - 22, y1 + 31, 3.2, (104, 190, 64, 255)))                # Status-LED (an)
-    # Batterie (Umriss mit Pol), darin der Blitz
-    bx1, by1, bx2, by2 = x1 + 16, y1 + 38, x2 - 22, y1 + 84
-    sh.append(("rrect", bx1, by1, bx2, by2, 6, g))
-    sh.append(("rrect", bx1 + 5, by1 + 5, bx2 - 5, by2 - 5, 3, white))
-    sh.append(("rrect", bx2, by1 + 14, bx2 + 7, by2 - 14, 2, g))
-    # Steckdosen: zwei Kreise mit je zwei Kontakten
-    for cx in (x1 + 29, x2 - 29):
-        sh.append(("circle", cx, y2 - 34, 14, g))
-        sh.append(("circle", cx, y2 - 34, 11, white))
-        sh.append(("rrect", cx - 6, y2 - 38, cx - 3, y2 - 30, 0, g))
-        sh.append(("rrect", cx + 3, y2 - 38, cx + 6, y2 - 30, 0, g))
-    for i in range(3):                                                                # Lueftungsschlitze
-        yy = y2 - 14 + i * 4
-        sh.append(("rrect", x1 + 22, yy, x2 - 22, yy + 2, 1, gl))
+    h = 38                                   # Hoehe einer Einheit
+    units = [(y1, y1 + h), (y2 - h, y2)]
+    for (ya, yb) in units:
+        sh.append(("rrect", x1, ya, x2, yb, 5, white))                               # Frontblende
+        sh.append(("rrect", x1, ya, x1 + 12, yb, 4, (214, 226, 205, 255)))           # Ohr links
+        sh.append(("rrect", x2 - 12, ya, x2, yb, 4, (214, 226, 205, 255)))           # Ohr rechts
+        for yy in (ya + 9, yb - 9):                                                  # Schraubenloecher
+            sh.append(("circle", x1 + 6, yy, 2.6, g))
+            sh.append(("circle", x2 - 6, yy, 2.6, g))
+    # obere Einheit: Einschalter, Display, Lueftungsschlitze
+    ya, yb = units[0]
+    sh.append(("circle", x1 + 24, (ya + yb) / 2, 7, g))
+    sh.append(("circle", x1 + 24, (ya + yb) / 2, 4.5, white))
+    sh.append(("rrect", x1 + 22, (ya + yb) / 2 - 7, x1 + 26, (ya + yb) / 2 - 1, 0, g))
+    sh.append(("rrect", x1 + 38, ya + 8, x1 + 66, yb - 8, 3, lcd))                   # Display (Blitz folgt in render)
+    for i in range(5):
+        yy = ya + 9 + i * 5
+        sh.append(("rrect", x1 + 76, yy, x2 - 18, yy + 2, 1, gl))
+    # untere Einheit: Griff und Lueftungsschlitze
+    ya, yb = units[1]
+    sh.append(("rrect", x1 + 26, ya + 7, x2 - 26, ya + 12, 2.5, g))                  # Griff
+    for i in range(4):
+        yy = ya + 18 + i * 4.5
+        sh.append(("rrect", x1 + 26, yy, x2 - 26, yy + 2, 1, gl))
     return sh
 
 
@@ -154,8 +163,8 @@ def render(size: int) -> Image.Image:
                 d.line([(x1 * k, y1 * k), (x2 * k, y2 * k)], fill=c, width=max(1, int(w * k)))
 
     draw(usv_shapes())
-    # Blitz in der Batterie der USV
-    d.polygon([(x * k, y * k) for x, y in BOLT], fill=G_TEXT)
+    # Blitz im Display der USV
+    d.polygon([(x * k, y * k) for x, y in BOLT], fill=(255, 214, 64, 255))
     draw(miniserver_shapes())
     # Verbindung mit Pfeilspitze
     d.line([(LINK_X[0] * k, LINK_Y * k), ((LINK_X[1] - 4) * k, LINK_Y * k)], fill="white", width=int(7 * k))

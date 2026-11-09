@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut2lox/plugin.cfg` und `nut2lox/bin/lib/AppVersion.
 
 ## [Unveröffentlicht]
 
+## [0.7.2] – 2026-11-09
+
+### Geändert
+- Logo: Das linke Symbol ist jetzt eine **Rack-USV** (19 Zoll, zwei Einheiten: USV mit Display, Einschalter und Lüftungsschlitzen, darunter ein Batteriemodul) statt eines Tower-Geräts.
+
 ## [0.7.1] – 2026-11-09
 
 ### Geändert

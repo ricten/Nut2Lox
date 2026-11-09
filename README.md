@@ -1,7 +1,7 @@
 # Nut2Lox – LoxBerry-Plugin
 <img src="docs/logo/logo_loxberry.png" alt="Nut2Lox Logo" width="128">
 
-**Version 0.7.1** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
+**Version 0.7.2** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
 
 Dokumentation: [docs/wiki/Home.md](docs/wiki/Home.md)
 
