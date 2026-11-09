@@ -145,6 +145,20 @@ if ($o !== null) {
 }
 $cl = new NutClient('127.0.0.1', $nutPort);
 $cl->connect();
+$info = $cl->info('usv');
+check('info Beschreibung', $info['beschreibung'] ?? null, 'Fake USV');
+check('info Serverversion', $info['server_version'] ?? null, 'Network UPS Tools upsd 2.8.0 - https://www.networkupstools.org/');
+check('info Protokoll', $info['protokoll'] ?? null, '1.3');
+check('info Anmeldungen', $info['anmeldungen'] ?? null, '2');
+check('info Clients', $info['clients'] ?? null, '2');
+check('info Befehle', $info['befehle'] ?? null, 'beeper.toggle,test.battery.start.quick');
+check('info beschreibbar', $info['beschreibbar'] ?? null, 'ups.delay.shutdown,input.transfer.low');
+check('info enum', $info['enum/ups_delay_shutdown'] ?? null, '20,30');
+check('info range', $info['range/input_transfer_low'] ?? null, '160..190');
+check('info ohne enum leer', isset($info['enum/input_transfer_low']), false);
+$cl->close();
+$cl = new NutClient('127.0.0.1', $nutPort);
+$cl->connect();
 check('instcmd ok', $cl->instcmd('usv', 'beeper.toggle', 'test', 'testpw1234'), true);
 $cl->close();
 $cl = new NutClient('127.0.0.1', $nutPort);
@@ -206,6 +220,14 @@ check('Lebenszeichen', str_contains($mlog(), "nut/status/zaehler\t1"), true);
 check('Zeitstempel', (bool)preg_match('/nut\/status\/ts\t\d{10}/', $mlog()), true);
 check('status.json', Util::jsonLoad($e2e . '/run/status.json')['service'] ?? '', 'running');
 
+check('Info Befehle', waitFor(fn() => str_contains($mlog(), "nut/usv/info/befehle\tbeeper.toggle,test.battery.start.quick")), true);
+check('Info schreibbar', str_contains($mlog(), "nut/usv/info/beschreibbar\tups.delay.shutdown,input.transfer.low"), true);
+check('Info enum', str_contains($mlog(), "nut/usv/info/enum/ups_delay_shutdown\t20,30"), true);
+check('Info Bereich', str_contains($mlog(), "nut/usv/info/range/input_transfer_low\t160..190"), true);
+check('Info Version', str_contains($mlog(), "nut/usv/info/server_version\tNetwork UPS Tools upsd 2.8.0"), true);
+check('Info Clients', str_contains($mlog(), "nut/usv/info/clients\t2"), true);
+check('Info Beschreibung', str_contains($mlog(), "nut/usv/info/beschreibung\tFake USV"), true);
+
 // Befehle
 file_put_contents($dir . '/inject.txt', "nut/befehl/usv/beeper_toggle\t1\n");
 check('Befehl angenommen', waitFor(fn() => str_contains($mlog(), "nut/befehl/usv/beeper_toggle/quittung\tangenommen")), true);
@@ -226,6 +248,17 @@ Util::jsonSave($e2e . '/nut.json', $conf);
 sleep(1);
 file_put_contents($dir . '/inject.txt', "nut/befehl/usv/beeper_toggle\t1\n");
 check('gesperrt', waitFor(fn() => str_contains($mlog(), "quittung\tabgelehnt: Befehle sind gesperrt")), true);
+
+// Server mit mehreren USVs (kein fester USV-Name): Geraetename alias_<usv>, Befehl an die zweite USV
+@touch(sys_get_temp_dir() . "/fake_nut_$nutPort.multi");
+$conf['befehle_frei'] = true;
+$conf['server'][1]['aktiv'] = false;
+Util::jsonSave($e2e . '/nut.json', $conf);
+check('mehrere USVs: Geraet usv_usv2', waitFor(fn() => str_contains($mlog(), "nut/usv_usv2/battery_charge\t100"), 12), true);
+check('mehrere USVs: erste als usv_usv', str_contains($mlog(), "nut/usv_usv/battery_charge\t100"), true);
+file_put_contents($dir . '/inject.txt', "nut/befehl/usv_usv2/beeper_toggle\t1\n");
+check('Befehl an zweite USV', waitFor(fn() => str_contains($mlog(), "nut/befehl/usv_usv2/beeper_toggle/quittung\tausgefuehrt")), true);
+@unlink(sys_get_temp_dir() . "/fake_nut_$nutPort.multi");
 
 // Quelle faellt aus -> status/ok 0, Zaehler laeuft weiter
 @touch(sys_get_temp_dir() . "/fake_nut_$nutPort.fail");

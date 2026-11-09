@@ -197,11 +197,22 @@ Bestehende Dateien werden einmalig als *.vor-nut-plugin gesichert. Ist die Optio
         ['zustand/bypass', '0/1', 'Bypass aktiv'],
         ['zustand/alarm', '0/1', 'Alarm'],
         ['verbunden', '0/1', 'NUT-Server erreichbar'],
+        ['info/beschreibung', 'Text', 'Beschreibung der USV (NUT)'],
+        ['info/server_version', 'Text', 'Version des NUT-Servers'],
+        ['info/protokoll', 'Text', 'NUT-Protokollversion'],
+        ['info/anmeldungen', '', 'Anzahl angemeldeter Clients (NUMLOGINS)'],
+        ['info/clients', '', 'Anzahl verbundener Clients (LIST CLIENT)'],
+        ['info/befehle', 'Text', 'Sofortbefehle der USV, kommagetrennt (LIST CMD)'],
+        ['info/beschreibbar', 'Text', 'Schreibbare Variablen, kommagetrennt (LIST RW)'],
+        ['info/enum/<variable>', 'Text', 'Erlaubte Werte einer schreibbaren Variable, kommagetrennt'],
+        ['info/range/<variable>', 'Text', 'Erlaubter Bereich einer schreibbaren Variable (min..max)'],
     ];
     ?>
 <h3>Einbindung in Loxone</h3>
 <p>Der Eingangsname ist das Topic mit _ statt /. Die Werte kommen über das MQTT-Gateway (Abo nut/#) als virtuelle Eingänge.
-Weitere NUT-Variablen kommen automatisch als nut/&lt;name&gt;/&lt;variable&gt; (Punkt wird zu _, z. B. battery_charge_low).</p>
+Weitere NUT-Variablen kommen automatisch als nut/&lt;name&gt;/&lt;variable&gt; (Punkt wird zu _, z. B. battery_charge_low).
+Die <i>info</i>-Topics (Befehle, schreibbare Variablen, Clients ...) werden alle 60 s aktualisiert, nicht jedes Intervall.
+Hat ein Server ohne festen USV-Namen mehrere USVs, heißen die Geräte &lt;name&gt;_&lt;usv&gt; (bei genau einer USV nur &lt;name&gt;).</p>
 <table>
 <tr><th>Topic</th><th>Eingangsname</th><th>Einheit</th><th>Bedeutung</th><th>retained</th></tr>
 <?php

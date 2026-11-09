@@ -8,6 +8,12 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.3.0] – 2026-11-09
+
+### Hinzugefügt
+- **Alles, was der NUT-Server liefert, geht an MQTT:** zusätzlich zu den Variablen jetzt unter `nut/<name>/info/…` (alle 60 s): `beschreibung`, `server_version`, `protokoll`, `anmeldungen` (NUMLOGINS), `clients` (LIST CLIENT), `befehle` (LIST CMD, kommagetrennt), `beschreibbar` (LIST RW), `enum/<variable>` und `range/<variable>` (erlaubte Werte bzw. Bereiche der schreibbaren Variablen). Nicht unterstützte Abfragen werden übersprungen.
+- **Mehrere USVs an einem Server:** ohne festen USV-Namen werden alle USVs des Servers abgefragt. Bei genau einer USV bleibt der Gerätename wie bisher `<name>`, bei mehreren heißt er `<name>_<usv>`. Befehle gehen an das jeweilige Gerät.
+
 ## [0.2.1] – 2026-11-09
 
 ### Behoben

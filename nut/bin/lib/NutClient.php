@@ -97,6 +97,110 @@ final class NutClient
         return null;
     }
 
+    /** Allgemeine LIST-Abfrage. @return string[]|null Zeilen ohne BEGIN/END; null bei Fehler (z. B. ERR FEATURE-NOT-SUPPORTED) */
+    public function rawList(string $cmd): ?array
+    {
+        $this->send($cmd);
+        $lines = [];
+        while (($l = $this->readLine()) !== false) {
+            if (str_starts_with($l, 'ERR ')) {
+                $this->error = 'NUT: ' . substr($l, 4);
+                return null;
+            }
+            if (str_starts_with($l, 'BEGIN LIST')) {
+                continue;
+            }
+            if (str_starts_with($l, 'END LIST')) {
+                return $lines;
+            }
+            $lines[] = $l;
+        }
+        $this->error = 'NUT: Zeitueberschreitung';
+        return null;
+    }
+
+    /** Einzeilige Antwort (VER, NETVER, GET ...). null bei ERR. */
+    public function rawLine(string $cmd): ?string
+    {
+        $this->send($cmd);
+        $l = $this->readLine();
+        if ($l === false || str_starts_with($l, 'ERR ')) {
+            return null;
+        }
+        return $l;
+    }
+
+    /**
+     * Zusatzinformationen des Servers zu einer USV (alles, was NUT ausser den Variablen liefert):
+     * Version, Protokoll, Anmeldungen, Clients, Sofortbefehle, schreibbare Variablen mit erlaubten Werten/Bereichen.
+     * @return array<string,string> Topic-Teil (unter info/) => Wert. Nicht unterstuetzte Abfragen fehlen einfach.
+     */
+    public function info(string $ups, string $desc = ''): array
+    {
+        $o = [];
+        if ($desc === '' && ($v = $this->rawLine("GET UPSDESC $ups")) !== null && preg_match('/^UPSDESC \S+ "(.*)"$/', $v, $m)) {
+            $desc = self::unquote($m[1]);
+        }
+        if ($desc !== '') {
+            $o['beschreibung'] = $desc;
+        }
+        if (($v = $this->rawLine('VER')) !== null) {
+            $o['server_version'] = self::value($v);
+        }
+        if (($v = $this->rawLine('NETVER')) !== null) {
+            $o['protokoll'] = self::value($v);
+        }
+        if (($v = $this->rawLine("GET NUMLOGINS $ups")) !== null && preg_match('/^NUMLOGINS \S+ (\d+)/', $v, $m)) {
+            $o['anmeldungen'] = $m[1];
+        }
+        if (($rows = $this->rawList("LIST CLIENT $ups")) !== null) {
+            $o['clients'] = (string)count($rows);
+        }
+        if (($rows = $this->rawList("LIST CMD $ups")) !== null) {
+            $names = [];
+            foreach ($rows as $r) {
+                if (preg_match('/^CMD \S+ (\S+)/', $r, $m)) {
+                    $names[] = $m[1];
+                }
+            }
+            $o['befehle'] = implode(',', $names);
+        }
+        if (($rows = $this->rawList("LIST RW $ups")) !== null) {
+            $names = [];
+            foreach ($rows as $r) {
+                if (preg_match('/^RW \S+ (\S+) /', $r, $m)) {
+                    $names[] = $m[1];
+                }
+            }
+            $o['beschreibbar'] = implode(',', $names);
+            foreach (array_slice($names, 0, 60) as $n) {
+                if (!preg_match('/^[A-Za-z0-9_.@-]+$/', $n)) {
+                    continue;
+                }
+                $vn = self::varName($n);
+                if (($e = $this->rawList("LIST ENUM $ups $n")) !== null && $e) {
+                    $vals = [];
+                    foreach ($e as $r) {
+                        if (preg_match('/^ENUM \S+ \S+ "(.*)"$/', $r, $m)) {
+                            $vals[] = self::unquote($m[1]);
+                        }
+                    }
+                    $o["enum/$vn"] = implode(',', $vals);
+                }
+                if (($e = $this->rawList("LIST RANGE $ups $n")) !== null && $e) {
+                    $vals = [];
+                    foreach ($e as $r) {
+                        if (preg_match('/^RANGE \S+ \S+ "(.*)" "(.*)"$/', $r, $m)) {
+                            $vals[] = $m[1] . '..' . $m[2];
+                        }
+                    }
+                    $o["range/$vn"] = implode(';', $vals);
+                }
+            }
+        }
+        return $o;
+    }
+
     private static function credentialsValid(string $user, string $pass): bool
     {
         return $user !== '' && !preg_match('/[\x00-\x20"\\\\]/', $user . $pass);

@@ -93,16 +93,13 @@ function handleCommand(string $topic, string $msg, array $nut, MqttClient $mqtt,
         $mqtt->publish($quit, 'abgelehnt: zum Ausloesen 1 senden');
         return;
     }
-    $srv = null;
-    foreach (NutConfig::servers($nut) as $s) {
-        if ($s['alias'] === $alias) {
-            $srv = $s;
-        }
-    }
-    if ($srv === null) {
+    $found = resolveDevice(NutConfig::servers($nut), $alias);
+    if ($found === null) {
         $mqtt->publish($quit, 'abgelehnt: unbekanntes Geraet');
         return;
     }
+    [$srv, $upsName] = $found;
+    $srv['ups'] = $upsName;
     $mqtt->publish($quit, 'angenommen');
     $err = '';
     $o = NutClient::open($srv, $err);
@@ -124,44 +121,104 @@ function handleCommand(string $topic, string $msg, array $nut, MqttClient $mqtt,
     }
 }
 
+/** Geraetename im Topic: alias; hat der Server mehrere USVs, alias_<usv>. */
+function deviceName(string $alias, string $ups, int $count): string
+{
+    return $count > 1 ? $alias . '_' . Util::name($ups) : $alias;
+}
+
+/** Zum Geraetenamen aus einem Befehlstopic Server und USV finden. @return array{0:array,1:string}|null */
+function resolveDevice(array $servers, string $dev): ?array
+{
+    foreach ($servers as $s) {
+        if ($s['ups'] !== '' && $s['alias'] === $dev) {
+            return [$s, $s['ups']];
+        }
+    }
+    foreach ($servers as $s) {       // ohne festen USV-Namen: am Server nachsehen
+        if ($s['ups'] !== '' || ($s['alias'] !== $dev && !str_starts_with($dev, $s['alias'] . '_'))) {
+            continue;
+        }
+        $c = new NutClient($s['host'], (int)$s['port']);
+        if (!$c->connect()) {
+            continue;
+        }
+        $list = $c->listUps();
+        $c->close();
+        foreach ($list ?: [] as $u => $d) {
+            if (deviceName($s['alias'], (string)$u, count($list)) === $dev) {
+                return [$s, (string)$u];
+            }
+        }
+    }
+    return null;
+}
+
 /** Ein Abrufdurchgang. @return array<string,array{ok:bool,error:string}> */
 function pollAll(array $servers, MqttClient $mqtt, Logger $log): array
 {
+    static $lastInfo = [];
     $res = [];
     foreach ($servers as $srv) {
         $alias = $srv['alias'];
         $err = '';
-        $vars = null;
-        $o = NutClient::open($srv, $err);
-        if ($o !== null) {
-            [$c, $ups] = $o;
-            $vars = $c->listVars($ups);
-            if ($vars === null) {
-                $err = $c->error;
+        $c = new NutClient($srv['host'], (int)$srv['port']);
+        $list = null;
+        if ($c->connect()) {
+            $list = $srv['ups'] !== '' ? [$srv['ups'] => ''] : $c->listUps();
+            if (!$list) {
+                $err = $c->error !== '' ? $c->error : 'Keine USV auf dem Server gefunden';
             }
-            $c->close();
+        } else {
+            $err = $c->error;
         }
-        if (!$vars) {
-            $err = $err !== '' ? $err : 'keine Werte erhalten';
+        if (!$list) {
             $log->error("[$alias] Abruf fehlgeschlagen: $err", "poll-$alias");
             $mqtt->publish(T . "/$alias/verbunden", '0');
             $res[$alias] = ['ok' => false, 'error' => $err];
+            $c->close();
             continue;
         }
-        $log->info("[$alias] erreichbar, " . count($vars) . ' Werte', "up-$alias");
-        foreach ($vars as $name => $val) {
-            $val = NutClient::value($val);
-            if ($val !== '') {          // ohne gueltigen Wert nichts senden
-                $mqtt->publish(T . "/$alias/" . NutClient::varName($name), $val);
+        $ok = true;
+        $n = 0;
+        foreach ($list as $ups => $desc) {
+            $dev = deviceName($alias, (string)$ups, count($list));
+            $vars = $c->listVars((string)$ups);
+            if (!$vars) {
+                $err = $vars === null ? $c->error : 'keine Werte erhalten';
+                $log->error("[$dev] Abruf fehlgeschlagen: $err", "poll-$dev");
+                $mqtt->publish(T . "/$dev/verbunden", '0');
+                $ok = false;
+                continue;
+            }
+            $n += count($vars);
+            foreach ($vars as $name => $val) {
+                $val = NutClient::value($val);
+                if ($val !== '') {          // ohne gueltigen Wert nichts senden
+                    $mqtt->publish(T . "/$dev/" . NutClient::varName($name), $val);
+                }
+            }
+            if (isset($vars['ups.status'])) {
+                foreach (NutClient::flags($vars['ups.status']) as $k => $v) {
+                    $mqtt->publish(T . "/$dev/zustand/$k", (string)$v);
+                }
+            }
+            $mqtt->publish(T . "/$dev/verbunden", '1');
+            // Zusatzinfos des Servers (Befehle, schreibbare Variablen, Clients ...) seltener: alle 60 s
+            if (time() - ($lastInfo[$dev] ?? 0) >= 60) {
+                $lastInfo[$dev] = time();
+                foreach ($c->info((string)$ups, (string)$desc) as $k => $v) {
+                    if ($v !== '') {
+                        $mqtt->publish(T . "/$dev/info/$k", $v);
+                    }
+                }
             }
         }
-        if (isset($vars['ups.status'])) {
-            foreach (NutClient::flags($vars['ups.status']) as $n => $v) {
-                $mqtt->publish(T . "/$alias/zustand/$n", (string)$v);
-            }
+        $c->close();
+        if ($ok) {
+            $log->info("[$alias] erreichbar, " . count($list) . ' USV, ' . $n . ' Werte', "up-$alias");
         }
-        $mqtt->publish(T . "/$alias/verbunden", '1');
-        $res[$alias] = ['ok' => true, 'error' => ''];
+        $res[$alias] = ['ok' => $ok, 'error' => $ok ? '' : $err];
     }
     return $res;
 }
