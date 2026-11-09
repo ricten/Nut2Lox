@@ -21,6 +21,7 @@ G_TEXT = "#3f7d10"
 LABEL = "Nut2Lox"
 LABEL_WIDTH = 300      # Breite der Beschriftung im 512er-Raster
 LABEL_BASE = 352       # Grundlinie
+OX, OY = -6, 11        # Verschiebung der ganzen Gruppe (Geraete + Name), damit sie im Kreis mittig sitzt
 
 USV = (98, 154, 216, 238)                  # x1, y1, x2, y2 (Rack-USV: zwei Hoeheneinheiten)
 MINISERVER = (270, 152, 426, 240)          # x1, y1, x2, y2 (gruenes Gehaeuse, Draufsicht)
@@ -154,25 +155,26 @@ def render(size: int) -> Image.Image:
         for sh in shapes:
             if sh[0] == "rrect":
                 _, x1, y1, x2, y2, rad, c = sh
-                d.rounded_rectangle(r(x1, y1, x2, y2), radius=rad * k, fill=c)
+                d.rounded_rectangle(r(x1 + OX, y1 + OY, x2 + OX, y2 + OY), radius=rad * k, fill=c)
             elif sh[0] == "circle":
                 _, cx, cy, rr, c = sh
-                d.ellipse(r(cx - rr, cy - rr, cx + rr, cy + rr), fill=c)
+                d.ellipse(r(cx - rr + OX, cy - rr + OY, cx + rr + OX, cy + rr + OY), fill=c)
             else:
                 _, x1, y1, x2, y2, w, c = sh
-                d.line([(x1 * k, y1 * k), (x2 * k, y2 * k)], fill=c, width=max(1, int(w * k)))
+                d.line([((x1 + OX) * k, (y1 + OY) * k), ((x2 + OX) * k, (y2 + OY) * k)], fill=c, width=max(1, int(w * k)))
 
     draw(usv_shapes())
     # Blitz im Display der USV
-    d.polygon([(x * k, y * k) for x, y in BOLT], fill=(255, 214, 64, 255))
+    d.polygon([((x + OX) * k, (y + OY) * k) for x, y in BOLT], fill=(255, 214, 64, 255))
     draw(miniserver_shapes())
     # Verbindung mit Pfeilspitze
-    d.line([(LINK_X[0] * k, LINK_Y * k), ((LINK_X[1] - 4) * k, LINK_Y * k)], fill="white", width=int(7 * k))
-    d.polygon([((LINK_X[1] + 8) * k, LINK_Y * k), ((LINK_X[1] - 6) * k, (LINK_Y - 11) * k),
-               ((LINK_X[1] - 6) * k, (LINK_Y + 11) * k)], fill="white")
+    ly = (LINK_Y + OY) * k
+    d.line([((LINK_X[0] + OX) * k, ly), ((LINK_X[1] - 4 + OX) * k, ly)], fill="white", width=int(7 * k))
+    d.polygon([((LINK_X[1] + 8 + OX) * k, ly), ((LINK_X[1] - 6 + OX) * k, ly - 11 * k),
+               ((LINK_X[1] - 6 + OX) * k, ly + 11 * k)], fill="white")
     # Beschriftung: "Nut2Lox" in einer Zeile
     font = _font(int(label_px() * k))
-    d.text((256 * k, LABEL_BASE * k), LABEL, font=font, fill="white", anchor="ms")
+    d.text((256 * k, (LABEL_BASE + OY) * k), LABEL, font=font, fill="white", anchor="ms")
     img = Image.alpha_composite(img, ov)
     return img.resize((size, size), Image.LANCZOS)
 

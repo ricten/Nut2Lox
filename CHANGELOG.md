@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut2lox/plugin.cfg` und `nut2lox/bin/lib/AppVersion.
 
 ## [Unveröffentlicht]
 
+## [0.7.3] – 2026-11-09
+
+### Geändert
+- Logo: Geräte und Name sitzen jetzt mittig im Kreis (vorher zu weit oben).
+
 ## [0.7.2] – 2026-11-09
 
 ### Geändert
