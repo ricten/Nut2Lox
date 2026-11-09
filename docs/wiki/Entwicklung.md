@@ -18,7 +18,7 @@ nut2lox/                    Inhalt des Plugin-ZIP
 ├── webfrontend/htmlauth/index.php
 └── icons/
 tests/                       Unit-/Ende-zu-Ende-Tests und Fake-Server (nicht im ZIP)
-tools/make_icon.py           Icons und Logo
+tools/make_logo.py           Logo und Plugin-Icons (Stil wie Senec2Lox)
 docs/                        Wiki, Logo, Vorlagen (nicht im ZIP)
 ```
 

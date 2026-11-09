@@ -5,9 +5,9 @@
 ^ Autor | Rico Tengler |
 ^ Logo | {{:plugins:nut2lox:logo_loxberry.png?64|Nut2Lox}} |
 ^ Status | BETA |
-^ Version | 0.7.0 |
+^ Version | 0.7.1 |
 ^ Min. LB Version | 4.0 (benötigt PHP 8.4) |
-^ Release Download | [[https://github.com/ricten/Nut2Lox/releases/latest|GitHub Releases (aktuelle Version)]] \\ [[https://github.com/ricten/Nut2Lox/releases/download/v0.7.0/nut2lox-0.7.0.zip|nut2lox-0.7.0.zip]] |
+^ Release Download | [[https://github.com/ricten/Nut2Lox/releases/latest|GitHub Releases (aktuelle Version)]] \\ [[https://github.com/ricten/Nut2Lox/releases/download/v0.7.1/nut2lox-0.7.1.zip|nut2lox-0.7.1.zip]] |
 ^ Pre-Release Download | - |
 ^ Quellcode | [[https://github.com/ricten/Nut2Lox|github.com/ricten/Nut2Lox]] (MIT-Lizenz) |
 ^ Beschreibung | Liest USV-Werte über das NUT-Protokoll (Network UPS Tools) aus und veröffentlicht sie per MQTT. Über das LoxBerry-MQTT-Gateway gelangen sie an den Loxone Miniserver. Optional richtet das Plugin einen NUT-Server für eine USB-USV am LoxBerry ein, auch für eine Synology DiskStation als Client. |
@@ -157,6 +157,7 @@ Weitere Hinweise: [[https://github.com/ricten/Nut2Lox/blob/main/docs/wiki/Fehler
 ===== 8. Changelog =====
 
 ^ Version ^ Änderung ^
+| 0.7.1 | Neues Logo |
 | 0.7.0 | Menü: MQTT-Broker im Reiter MQTT, Reiter „Einstellungen USV/NUT“ |
 | 0.6.0 | Eigener MQTT-Broker einstellbar, rundes Logo, Dokumentation |
 | 0.5.0 | Plugin umbenannt in Nut2Lox (Topics unverändert) |

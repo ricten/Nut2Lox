@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut2lox/plugin.cfg` und `nut2lox/bin/lib/AppVersion.
 
 ## [Unveröffentlicht]
 
+## [0.7.1] – 2026-11-09
+
+### Geändert
+- **Neues Logo** im Stil von Senec2Lox: runde grüne Fläche mit dem Namen „Nut2Lox“, links eine USV (Batterie mit Blitz, Steckdosen), rechts der Miniserver, dazwischen ein Pfeil. Erzeugt mit `python tools/make_logo.py` (ersetzt `tools/make_icon.py`).
+
 ## [0.7.0] – 2026-11-09
 
 ### Geändert
