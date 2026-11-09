@@ -98,6 +98,14 @@ if (DIRECTORY_SEPARATOR === '/') {
     check('Rechte 0600', substr(sprintf('%o', fileperms($cfgFile)), -4), '0600');
 }
 check('laden', NutConfig::load($cfgFile)['server'][0]['host'], '10.0.0.5');
+check('ownBroker standardmaessig aus', NutConfig::ownBroker($c), null);
+$nb = NutConfig::fromPost($c, ['mqtt' => ['eigener_broker' => '1', 'host' => ' broker.lan ', 'port' => '8883', 'benutzer' => 'u1', 'passwort' => 'brokerpw']]);
+check('ownBroker aus Einstellungen', NutConfig::ownBroker($nb), ['broker.lan', 8883, 'u1', 'brokerpw']);
+$nb2 = NutConfig::fromPost($nb, ['mqtt' => ['eigener_broker' => '1', 'host' => 'broker.lan', 'passwort' => '']]);
+check('Broker-Passwort bleibt bei leerem Feld', $nb2['mqtt']['passwort'], 'brokerpw');
+check('Broker-Port Standard', $nb2['mqtt']['port'], 1883);
+check('ownBroker ohne Host = LoxBerry-Broker', NutConfig::ownBroker(NutConfig::fromPost($c, ['mqtt' => ['eigener_broker' => '1', 'host' => '']])), null);
+check('ownBroker ohne Haken = LoxBerry-Broker', NutConfig::ownBroker(NutConfig::fromPost($c, ['mqtt' => ['host' => 'x.lan']])), null);
 check('servers', count(NutConfig::servers(NutConfig::load($cfgFile))), 1);
 $lokalFile = $dir . '/lokal.conf';
 NutConfig::writeLokal($lokalFile, array_merge($n['lokal'], ['aktiv' => true]));
@@ -200,11 +208,12 @@ $e2e = $dir . '/e2e';
 $conf = NutConfig::load($e2e . '/nut.json');
 $conf['intervall'] = 2;
 $conf['befehle_frei'] = true;
+$conf['mqtt'] = ['eigener_broker' => true, 'host' => '127.0.0.1', 'port' => $mqPort, 'benutzer' => '', 'passwort' => ''];   // Ende-zu-Ende ueber die Option "eigener Broker"
 $conf['server'][0] = ['aktiv' => true, 'alias' => 'usv', 'host' => '127.0.0.1', 'port' => $nutPort, 'ups' => '', 'benutzer' => 'test', 'passwort' => 'testpw1234'];
 $conf['server'][1] = ['aktiv' => true, 'alias' => 'weg', 'host' => '127.0.0.1', 'port' => 1, 'ups' => 'x', 'benutzer' => '', 'passwort' => ''];
 Util::jsonSave($e2e . '/nut.json', $conf);
 @unlink($dir . '/mqtt.log');
-$svc = startProc([$php, dirname(__DIR__) . '/nut2lox/bin/nutd.php'], ['NUT_DEV_DIR' => $e2e, 'NUT_DEV_MQTT' => "127.0.0.1:$mqPort", 'NUT_DEV_LOGLEVEL' => 'debug']);
+$svc = startProc([$php, dirname(__DIR__) . '/nut2lox/bin/nutd.php'], ['NUT_DEV_DIR' => $e2e, 'NUT_DEV_LOGLEVEL' => 'debug']);
 $mlog = fn() => (string)@file_get_contents($dir . '/mqtt.log');
 
 check('Dienst veroeffentlicht Wert', waitFor(fn() => str_contains($mlog(), "nut/usv/battery_charge\t100")), true);

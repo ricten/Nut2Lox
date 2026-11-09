@@ -8,6 +8,15 @@ Release-Ablauf: Version in `nut2lox/plugin.cfg` und `nut2lox/bin/lib/AppVersion.
 
 ## [Unveröffentlicht]
 
+## [0.6.0] – 2026-11-09
+
+### Hinzugefügt
+- **Eigener MQTT-Broker:** In den Einstellungen lässt sich statt dem LoxBerry-Broker ein eigener Broker eintragen (Host, Port, Benutzer, Passwort). Standard bleibt der LoxBerry-Broker. Das Passwort wird nie angezeigt oder geloggt; eine Änderung wirkt ohne Neustart (der Dienst verbindet neu). Die Selbstprüfung testet den gewählten Broker.
+- **Dokumentation** wie bei Senec2Lox: Wiki unter `docs/wiki/` (Installation, Konfiguration, Lokaler NUT-Server, MQTT-Topics, Loxone-Anbindung, Fehlersuche, Entwicklung), Vorlage für das LoxBerry-Wiki, Forenbeitrag, Logo.
+
+### Geändert
+- **Rundes Logo/Icon** (`tools/make_icon.py` erzeugt Plugin-Icons und Logo).
+
 ## [0.5.0] – 2026-11-09
 
 ### Geändert

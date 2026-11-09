@@ -53,12 +53,16 @@ if (function_exists('pcntl_async_signals')) {
 }
 
 /** Broker-Daten: LoxBerry-Konfiguration (keine eigenen Zugangsdaten), im Test NUT_DEV_MQTT=host:port. */
-function brokerDetails(Logger $log): ?array
+function brokerDetails(Logger $log, array $nut): ?array
 {
     $dev = getenv('NUT_DEV_MQTT');
     if ($dev) {
         [$h, $p] = explode(':', $dev, 2) + [1 => '1883'];
         return [$h, (int)$p, '', ''];
+    }
+    $own = NutConfig::ownBroker($nut);        // eigener Broker aus den Plugin-Einstellungen
+    if ($own !== null) {
+        return $own;
     }
     if (!function_exists('mqtt_connectiondetails')) {
         $log->error('LoxBerry-Funktion mqtt_connectiondetails() nicht verfuegbar', 'mqtt-details');
@@ -262,7 +266,15 @@ while ($running) {
         $mt = is_file($paths->config) ? (int)filemtime($paths->config) : 0;
         if ($mt !== $cfgMtime) {
             $cfgMtime = $mt;
+            $oldMqtt = $nut['mqtt'];
             $nut = NutConfig::load($paths->config);
+            if ($oldMqtt != $nut['mqtt'] && $mqtt !== null) {      // Broker geaendert: neu verbinden
+                $mqtt->close();
+                $mqtt = null;
+                $mqttNext = 0;
+                $mqttBackoff = 2;
+            }
+            $log->addSecret((string)$nut['mqtt']['passwort']);
             foreach ($nut['server'] as $s) {
                 $log->addSecret((string)$s['passwort']);
             }
@@ -273,7 +285,7 @@ while ($running) {
 
         // MQTT verbinden (mit wachsendem Abstand bei Fehlern)
         if (($mqtt === null || !$mqtt->connected()) && $now >= $mqttNext) {
-            $bd = brokerDetails($log);
+            $bd = brokerDetails($log, $nut);
             if ($bd === null) {
                 $mqttErr = 'Keine Broker-Daten';
                 $mqttNext = $now + 30;

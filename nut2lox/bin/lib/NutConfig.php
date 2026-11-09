@@ -14,6 +14,7 @@ final class NutConfig
         return [
             'intervall' => 10,
             'befehle_frei' => false,
+            'mqtt' => ['eigener_broker' => false, 'host' => '', 'port' => 1883, 'benutzer' => '', 'passwort' => ''],
             'server' => [self::defaultServer('usv'), self::defaultServer(), self::defaultServer(), self::defaultServer()],
             'lokal' => [
                 'aktiv' => false, 'name' => 'usv', 'treiber' => 'usbhid-ups', 'vendorid' => '', 'productid' => '',
@@ -38,6 +39,7 @@ final class NutConfig
         $out['server'] = array_slice($srv, 0, 4);
         $out['intervall'] = max(2, min(300, (int)$out['intervall']));
         $out['befehle_frei'] = (bool)$out['befehle_frei'];
+        $out['mqtt'] = array_merge($def['mqtt'], is_array($c['mqtt'] ?? null) ? $c['mqtt'] : []);
         return $out;
     }
 
@@ -69,6 +71,15 @@ final class NutConfig
         $new = $old;
         $new['intervall'] = max(2, min(300, (int)($post['intervall'] ?? 10)));
         $new['befehle_frei'] = !empty($post['befehle_frei']);
+        $m = is_array($post['mqtt'] ?? null) ? $post['mqtt'] : [];
+        $mpw = (string)($m['passwort'] ?? '');
+        $new['mqtt'] = [
+            'eigener_broker' => !empty($m['eigener_broker']),
+            'host' => (string)preg_replace('/[^A-Za-z0-9_.:-]/', '', trim((string)($m['host'] ?? ''))),
+            'port' => max(1, min(65535, (int)($m['port'] ?? 1883))),
+            'benutzer' => trim((string)($m['benutzer'] ?? '')),
+            'passwort' => $mpw !== '' ? $mpw : (string)$old['mqtt']['passwort'],
+        ];
         for ($i = 0; $i < 4; $i++) {
             $p = is_array($post['srv'][$i] ?? null) ? $post['srv'][$i] : [];
             $pw = (string)($p['passwort'] ?? '');
@@ -104,6 +115,19 @@ final class NutConfig
             'passwort' => $o['passwort'] !== '' ? $o['passwort'] : bin2hex(random_bytes(12)),
         ];
         return $new;
+    }
+
+    /**
+     * Eigener MQTT-Broker aus der Konfiguration (statt dem LoxBerry-Broker).
+     * @return array{0:string,1:int,2:string,3:string}|null  [host, port, user, pass]; null = LoxBerry-Broker verwenden
+     */
+    public static function ownBroker(array $cfg): ?array
+    {
+        $m = $cfg['mqtt'];
+        if (empty($m['eigener_broker']) || trim((string)$m['host']) === '') {
+            return null;
+        }
+        return [trim((string)$m['host']), (int)$m['port'] > 0 ? (int)$m['port'] : 1883, (string)$m['benutzer'], (string)$m['passwort']];
     }
 
     /** key=value-Datei fuer das Root-Skript nut-apply.sh (Rechte 0600). */

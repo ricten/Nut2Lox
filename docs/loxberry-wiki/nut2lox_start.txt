@@ -1,0 +1,165 @@
+====== Nut2Lox ======
+
+===== Plugin-Daten =====
+
+^ Autor | Rico Tengler |
+^ Logo | {{:plugins:nut2lox:logo_loxberry.png?64|Nut2Lox}} |
+^ Status | BETA |
+^ Version | 0.6.0 |
+^ Min. LB Version | 4.0 (benötigt PHP 8.4) |
+^ Release Download | [[https://github.com/ricten/Nut2Lox/releases/latest|GitHub Releases (aktuelle Version)]] \\ [[https://github.com/ricten/Nut2Lox/releases/download/v0.6.0/nut2lox-0.6.0.zip|nut2lox-0.6.0.zip]] |
+^ Pre-Release Download | - |
+^ Quellcode | [[https://github.com/ricten/Nut2Lox|github.com/ricten/Nut2Lox]] (MIT-Lizenz) |
+^ Beschreibung | Liest USV-Werte über das NUT-Protokoll (Network UPS Tools) aus und veröffentlicht sie per MQTT. Über das LoxBerry-MQTT-Gateway gelangen sie an den Loxone Miniserver. Optional richtet das Plugin einen NUT-Server für eine USB-USV am LoxBerry ein, auch für eine Synology DiskStation als Client. |
+^ Sprachen | DE |
+^ Diskussion | FORUM-LINK-EINTRAGEN |
+
+----
+
+===== 1. Überblick =====
+
+**Nut2Lox** fragt eine **USV** über den **NUT-Server** (Port 3493) ab und stellt die Werte als **MQTT-Topics** auf dem MQTT-Broker des LoxBerry bereit. Das LoxBerry-MQTT-Gateway macht daraus **virtuelle Eingänge** für den Loxone Miniserver.
+
+  NUT-Server (USV)  ->  Nut2Lox (LoxBerry)  ->  MQTT-Broker  ->  MQTT-Gateway  ->  Miniserver (virtuelle Eingänge)
+
+Eigenschaften:
+
+  * Bis zu **4 NUT-Server** im Netz, auch Server mit **mehreren USVs**
+  * **Alle** Variablen des Servers als Topics (''nut/usv/battery_charge'' …), dazu Zustände 0/1 (''zustand/batterie'' = Netzausfall) und Zusatzinfos (''info/*'')
+  * Optional **eigener NUT-Server** auf dem LoxBerry für eine **USB-USV**, auf Wunsch für eine **Synology DiskStation** als Client
+  * **Befehle** aus Loxone (Piepser, Batterietest): ab Werk gesperrt, mit Quittung
+  * MQTT-Broker des LoxBerry **oder eigener Broker**
+  * Lebenszeichen (''nut/status/ok'', ''zaehler'', ''ts''), Autostart, Watchdog
+
+===== 2. Installation =====
+
+  - ZIP von der Release-Seite herunterladen.
+  - LoxBerry → **Plugin-Verwaltung** → **Plugin installieren**. Die Installation holt ''nut-server'', ''nut-client'' und ''usbutils'', richtet die sudo-Erlaubnis ein und startet den Dienst.
+  - Plugin **Nut2Lox** öffnen, NUT-Server eintragen, **Aktiv** anhaken, speichern.
+  - Nach spätestens einem Abfrageintervall (10 s) erscheinen Werte unter ''nut/<name>/*''.
+
+==== 2.1 Update ====
+
+Als Update installieren. Konfiguration und Daten bleiben erhalten.
+
+==== 2.2 Umstieg vom früheren Plugin "nut" ====
+
+Bis 0.4.4 hieß das Plugin ''nut''. ''nut2lox'' zuerst installieren (übernimmt die Einstellungen), danach das alte Plugin deinstallieren. Die Topics bleiben gleich.
+
+==== 2.3 Deinstallation ====
+
+Plugin entfernen. Dienst, RAM-Daten und sudo-Erlaubnis werden gelöscht. ''/etc/nut'' und die Pakete bleiben bestehen.
+
+===== 3. Konfiguration (LoxBerry) =====
+
+Reiter: **Einstellungen · MQTT · Einbindung in Loxone · Test · Logdateien**. Änderungen wirken ohne Neustart.
+
+==== 3.1 Allgemein ====
+
+^ Einstellung ^ Standard ^ Beschreibung ^
+| Abfrageintervall | 10 s | 2–300 s |
+| Befehle aus Loxone freigeben | aus | Piepser und Batterietest. Nie erlaubt: Abschalten, „Last aus“ |
+
+==== 3.2 MQTT-Broker ====
+
+^ Einstellung ^ Standard ^ Beschreibung ^
+| Eigenen MQTT-Broker verwenden | aus | Aus: Broker des LoxBerry (Zugangsdaten verwaltet LoxBerry) |
+| Host/IP, Port | - / 1883 | Eigener Broker (ohne TLS) |
+| Benutzer, Passwort | leer | Optional; das Passwort wird nie angezeigt oder geloggt |
+
+Mit eigenem Broker erreichen die Werte den Miniserver nur, wenn das MQTT-Gateway diesen Broker abonniert.
+
+==== 3.3 NUT-Server im Netz ====
+
+Bis zu vier Server. Ein Kästchen zeigt, ob der Server erreichbar ist (grün/rot/grau).
+
+^ Spalte ^ Beschreibung ^
+| Aktiv | Nur aktive Server werden abgefragt |
+| Name im Topic | Gerätename (''a-z 0-9 _ -''), leer = USV-Name |
+| Host/IP, Port | Adresse des NUT-Servers (3493) |
+| USV-Name | leer = alle USVs des Servers (mehrere: ''<name>_<usv>'') |
+| Benutzer, Passwort | nur für Befehle nötig |
+
+==== 3.4 USV per USB am LoxBerry ====
+
+^ Einstellung ^ Beschreibung ^
+| Lokalen NUT-Server einrichten | Schreibt ''/etc/nut'' (Betriebsart ''netserver'', ohne upsmon: der LoxBerry fährt nicht selbst herunter) |
+| Name, Treiber, Vendor-/Product-ID | ''usbhid-ups'' passt für die meisten USVs; **USB-Geräte suchen** zeigt die IDs |
+| Im Netz freigeben | Server lauscht auf ''0.0.0.0:3493'', sonst nur lokal |
+| Synology (DSM) als Client | USV heißt ''ups'', Benutzer ''monuser'' (Passwort ''secret'', nur lesend), Netzfreigabe |
+
+Bestehende Dateien in ''/etc/nut'' werden einmalig als ''*.vor-nut-plugin'' gesichert. In DSM: //Systemsteuerung → Hardware & Energie → USV//, Typ //Synology USV-Server//, IP des LoxBerry.
+
+==== 3.5 Test und Logdateien ====
+
+^ Aktion ^ Wirkung ^
+| Sofort abrufen | Zeigt alle Variablen der Server |
+| Selbstprüfung | Konfiguration, NUT-Server, Anmeldung, Broker, Gateway-Abo, Dienst, Befehlsbrücke |
+| Dienst neu starten | Beendet und startet den Dienst |
+
+Der Loglevel wird in der LoxBerry-Plugin-Verwaltung eingestellt.
+
+===== 4. MQTT-Topics (Referenz) =====
+
+Schema ''nut/<name>/<wert>'', Zahlen mit Punkt, Zustände 0/1, nicht retained.
+
+^ Topic ^ Bedeutung ^
+| ''battery_charge'' | Ladezustand (%) |
+| ''battery_runtime'' | Restlaufzeit (s) |
+| ''battery_voltage'', ''input_voltage'', ''output_voltage'' | Spannungen (V) |
+| ''ups_load'' | Last (%) |
+| ''ups_status'' | Status als Text (OL, OB, …) |
+| ''zustand/online'', ''batterie'', ''batterie_schwach'', ''batterie_tauschen'', ''laedt'', ''entlaedt'', ''ueberlast'', ''bypass'', ''alarm'' | Zustände 0/1 aus ''ups.status'' |
+| ''verbunden'' | NUT-Server liefert Werte (1/0) |
+| ''info/befehle'', ''info/beschreibbar'', ''info/enum/…'', ''info/range/…'' | Sofortbefehle, schreibbare Variablen, erlaubte Werte/Bereiche |
+| ''info/beschreibung'', ''server_version'', ''protokoll'', ''anmeldungen'', ''clients'' | Infos des Servers (alle 60 s) |
+| ''nut/status/ok'' | Plugin arbeitet fehlerfrei (1/0); der Broker setzt 0, wenn der Dienst abbricht |
+| ''nut/status/zaehler'' | Lebenszeichen 0–999 |
+| ''nut/status/ts'' | Zeitstempel des letzten Durchgangs |
+
+===== 5. Miniserver Anbindung =====
+
+==== 5.1 MQTT-Gateway ====
+
+Das Plugin trägt das Abonnement ''nut/#'' selbst ein. ''nut/status/ok'' und ''nut/status/zaehler'' im Gateway auf **No Cache** stellen.
+
+==== 5.2 Virtuelle Eingänge ====
+
+Das Gateway ersetzt ''/'' durch ''_'': ''nut/usv/battery_charge'' wird zu ''nut_usv_battery_charge''. Die Tabelle aller Eingänge zeigt das Plugin im Reiter //Einbindung in Loxone//.
+
+^ Eingang ^ Bedeutung ^
+| ''nut_usv_battery_charge'' | Ladezustand (%) |
+| ''nut_usv_zustand_batterie'' | 1 = Netzausfall |
+| ''nut_usv_zustand_batterie_schwach'' | 1 = Batterie schwach |
+| ''nut_status_zaehler'' | Lebenszeichen für die Ausfallerkennung |
+
+==== 5.3 Befehle ====
+
+Freigabe in den Einstellungen. Virtueller Ausgang: Adresse ''/dev/udp/<LoxBerry-IP>/11884'', Befehl bei EIN ''publish nut/befehl/usv/beeper_toggle 1'' (ohne HTTP-Header/Body). Antwort unter ''nut/befehl/usv/beeper_toggle/quittung'': ''angenommen'', ''ausgefuehrt'' oder ''abgelehnt: <Grund>''.
+
+===== 6. Tipps & Tricks =====
+
+  * Die Synology fährt sich bei fast leerer Batterie selbst herunter, der LoxBerry nicht (kein upsmon).
+  * Das Passwort ''secret'' der Synology ist fest vorgegeben: Port 3493 nur im Heimnetz erreichbar lassen.
+  * Für Netzausfall-Meldungen ''nut_usv_zustand_batterie'' auswerten.
+
+===== 7. FAQ / Troubleshooting =====
+
+^ Symptom ^ Ursache / Lösung ^
+| Keine Werte in MQTT | Server auf **Aktiv**? Reiter MQTT und Selbstprüfung ansehen |
+| Kästchen rot | IP/Port falsch, NUT-Server aus oder Fehler (Text steht daneben) |
+| „sudo: a password is required“ | Plugin neu installieren/aktualisieren (die Installation legt die sudo-Erlaubnis an) |
+| Synology: „Verbindung zum Netzwerk-USV-Server nicht möglich“ | Netzfreigabe aktiv? ''ss -ltnp | grep 3493'' muss ''0.0.0.0'' zeigen, sonst „Lokalen Server neu einrichten“ |
+| Befehl abgelehnt | Freigabe fehlt, Befehl nicht unterstützt (''info/befehle''), Benutzer/Passwort prüfen |
+
+Weitere Hinweise: [[https://github.com/ricten/Nut2Lox/blob/main/docs/wiki/Fehlersuche.md|Fehlersuche im Repository]].
+
+===== 8. Changelog =====
+
+^ Version ^ Änderung ^
+| 0.6.0 | Eigener MQTT-Broker einstellbar, rundes Logo, Dokumentation |
+| 0.5.0 | Plugin umbenannt in Nut2Lox (Topics unverändert) |
+| 0.4.x | Erreichbarkeitsanzeige, upsd lauscht bei Freigabe auf 0.0.0.0, Loglevel-Auswahl |
+| 0.3.0 | Zusatzinfos (''info/*''), mehrere USVs je Server |
+| 0.2.0 | Synology als NUT-Client |
+| 0.1.0 | Erste Version |

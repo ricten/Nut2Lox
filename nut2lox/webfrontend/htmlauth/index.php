@@ -113,6 +113,18 @@ foreach ($tabs as $k => $t) {
  Befehle aus Loxone freigeben (Piepser, Batterietest)</label><br>
 <span class="hinweis">Ab Werk gesperrt. Erlaubt sind nur beeper.* und test.battery.* / test.panel.* – nie Abschalten oder Last aus.</span></p>
 
+<h3>MQTT-Broker</h3>
+<?php $mq = $nut['mqtt']; ?>
+<p><label><input type="checkbox" name="mqtt[eigener_broker]" value="1" <?= !empty($mq['eigener_broker']) ? 'checked' : '' ?>>
+ Eigenen MQTT-Broker verwenden (statt dem Broker des LoxBerry)</label></p>
+<table>
+<tr><th>Host/IP</th><td><input type="text" name="mqtt[host]" value="<?= h($mq['host']) ?>" size="24"></td>
+<th>Port</th><td><input type="number" name="mqtt[port]" value="<?= (int)$mq['port'] ?>" style="width:90px"></td></tr>
+<tr><th>Benutzer</th><td><input type="text" name="mqtt[benutzer]" value="<?= h($mq['benutzer']) ?>" size="16" autocomplete="off"></td>
+<th>Passwort</th><td><input type="password" name="mqtt[passwort]" value="" size="16" autocomplete="new-password" placeholder="<?= $mq['passwort'] !== '' ? '(gesetzt)' : '' ?>"></td></tr>
+</table>
+<p class="hinweis">Ohne Haken verwendet das Plugin den MQTT-Broker aus der LoxBerry-Konfiguration (empfohlen, Zugangsdaten verwaltet LoxBerry). Mit eigenem Broker erreichen die Werte den Miniserver nur, wenn das MQTT-Gateway diesen Broker abonniert. Ein leeres Passwortfeld behält das gespeicherte Passwort.</p>
+
 <h3>NUT-Server im Netz</h3>
 <table>
 <tr><th>Status</th><th>Aktiv</th><th>Name im Topic</th><th>Host/IP</th><th>Port</th><th>USV-Name</th><th>Benutzer</th><th>Passwort</th></tr>
@@ -173,12 +185,13 @@ Bestehende Dateien werden einmalig als *.vor-nut-plugin gesichert. Ist die Optio
 </form>
 
 <?php } elseif ($tab === 'mqtt') {
-    $d = function_exists('mqtt_connectiondetails') ? mqtt_connectiondetails() : [];
+    $own = NutConfig::ownBroker($nut);
+    $d = $own !== null ? ['brokerhost' => $own[0], 'brokerport' => $own[1]] : (function_exists('mqtt_connectiondetails') ? mqtt_connectiondetails() : []);
     $abo = is_file(LBPCONFIGDIR . '/mqtt_subscriptions.cfg');
     ?>
 <h3>MQTT</h3>
 <table>
-<tr><th>Broker (aus der LoxBerry-Konfiguration)</th><td><?= h(($d['brokerhost'] ?? '?') . ':' . ($d['brokerport'] ?? '?')) ?></td></tr>
+<tr><th><?= $own !== null ? 'Broker (eigener, aus den Plugin-Einstellungen)' : 'Broker (aus der LoxBerry-Konfiguration)' ?></th><td><?= h(($d['brokerhost'] ?? '?') . ':' . ($d['brokerport'] ?? '?')) ?></td></tr>
 <tr><th>Gateway-Abo</th><td>nut/# <?= $abo ? '<span class="ok">hinterlegt</span>' : '<span class="fehler">fehlt</span>' ?></td></tr>
 <tr><th>Dienst</th><td><?= $laeuft ? '<span class="ok">läuft</span> (Version ' . h($status['version'] ?? '?') . ')' : '<span class="fehler">läuft nicht</span> (der Wächter startet ihn spätestens nach einer Minute)' ?></td></tr>
 <tr><th>Broker-Verbindung des Dienstes</th><td><?= !empty($status['mqtt']) ? '<span class="ok">verbunden</span>' : '<span class="fehler">getrennt</span> ' . h($status['mqtt_error'] ?? '') ?></td></tr>
@@ -189,7 +202,7 @@ Bestehende Dateien werden einmalig als *.vor-nut-plugin gesichert. Ist die Optio
 <?php foreach (($status['server'] ?? []) as $a => $r) {
     echo '<p>' . h($a) . ': ' . (!empty($r['ok']) ? '<span class="ok">erreichbar</span>' : '<span class="fehler">' . h($r['error'] ?? 'Fehler') . '</span>') . '</p>';
 } ?>
-<p class="hinweis">Zugangsdaten zum Broker verwaltet LoxBerry (MQTT-Gateway); das Plugin hat keine eigenen.</p>
+<p class="hinweis">Standard: Zugangsdaten zum Broker verwaltet LoxBerry (MQTT-Gateway), das Plugin hat keine eigenen. Nur bei „Eigenen MQTT-Broker verwenden“ liegen sie in der Plugin-Konfiguration (Rechte 0600) und werden nie angezeigt oder geloggt.</p>
 
 <?php } elseif ($tab === 'loxone') {
     $aliase = array_map(fn($s) => $s['alias'], NutConfig::servers($nut)) ?: ['usv'];
@@ -329,7 +342,8 @@ foreach ($aliase as $a) {
                 }
             }
         }
-        $d = function_exists('mqtt_connectiondetails') ? mqtt_connectiondetails() : [];
+        $own = NutConfig::ownBroker($nut);
+        $d = $own !== null ? ['brokerhost' => $own[0], 'brokerport' => $own[1], 'brokeruser' => $own[2], 'brokerpass' => $own[3]] : (function_exists('mqtt_connectiondetails') ? mqtt_connectiondetails() : []);
         $mq = new MqttClient((string)($d['brokerhost'] ?? 'localhost'), (int)($d['brokerport'] ?? 1883), (string)($d['brokeruser'] ?? ''), (string)($d['brokerpass'] ?? ''), 'nut_test_' . $paths->folder, 'nut/status/test');
         $okm = $mq->connect();
         $zeile('Broker', $okm, $okm ? 'Verbindung möglich' : $mq->lastError());
