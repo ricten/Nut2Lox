@@ -24,7 +24,7 @@ final class Paths
         $p = new Paths();
         $dev = getenv('NUT_DEV_DIR');
         if ($dev) {
-            $p->folder = getenv('NUT_DEV_FOLDER') ?: 'nut';
+            $p->folder = getenv('NUT_DEV_FOLDER') ?: 'nut2lox';
             $p->config = $dev . '/nut.json';
             $p->lokal = $dev . '/lokal.conf';
             $p->logfile = $dev . '/nut.log';

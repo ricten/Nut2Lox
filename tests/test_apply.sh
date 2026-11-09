@@ -5,7 +5,7 @@ set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 T="$HERE/tmp/apply"
 rm -rf "$T"; mkdir -p "$T/lb/bin/plugins/nut" "$T/lb/config/plugins/nut" "$T/etc"
-cp "$HERE/../nut/bin/nut-apply.sh" "$T/lb/bin/plugins/nut/"
+cp "$HERE/../nut2lox/bin/nut-apply.sh" "$T/lb/bin/plugins/nut/"
 APPLY="$T/lb/bin/plugins/nut/nut-apply.sh"
 CONF="$T/lb/config/plugins/nut/lokal.conf"
 export NUT_APPLY_ETC="$T/etc"

@@ -11,7 +11,7 @@ foreach (['Util', 'Logger', 'MqttClient'] as $c) {
     require_once $root . '/../common/php/' . $c . '.php';
 }
 foreach (['NutClient', 'NutConfig', 'AppVersion'] as $c) {
-    require_once $root . '/nut/bin/lib/' . $c . '.php';
+    require_once $root . '/nut2lox/bin/lib/' . $c . '.php';
 }
 
 $fails = 0;
@@ -204,12 +204,12 @@ $conf['server'][0] = ['aktiv' => true, 'alias' => 'usv', 'host' => '127.0.0.1', 
 $conf['server'][1] = ['aktiv' => true, 'alias' => 'weg', 'host' => '127.0.0.1', 'port' => 1, 'ups' => 'x', 'benutzer' => '', 'passwort' => ''];
 Util::jsonSave($e2e . '/nut.json', $conf);
 @unlink($dir . '/mqtt.log');
-$svc = startProc([$php, dirname(__DIR__) . '/nut/bin/nutd.php'], ['NUT_DEV_DIR' => $e2e, 'NUT_DEV_MQTT' => "127.0.0.1:$mqPort", 'NUT_DEV_LOGLEVEL' => 'debug']);
+$svc = startProc([$php, dirname(__DIR__) . '/nut2lox/bin/nutd.php'], ['NUT_DEV_DIR' => $e2e, 'NUT_DEV_MQTT' => "127.0.0.1:$mqPort", 'NUT_DEV_LOGLEVEL' => 'debug']);
 $mlog = fn() => (string)@file_get_contents($dir . '/mqtt.log');
 
 check('Dienst veroeffentlicht Wert', waitFor(fn() => str_contains($mlog(), "nut/usv/battery_charge\t100")), true);
 $l = $mlog();
-check('Client-ID', str_contains($l, "CONNECT\tnut_nut\tnut/status/ok"), true);
+check('Client-ID', str_contains($l, "CONNECT\tnut_nut2lox\tnut/status/ok"), true);
 check('Abo Befehle', str_contains($l, "SUB\tnut/befehl/#"), true);
 check('Zustand online', str_contains($l, "nut/usv/zustand/online\t1"), true);
 check('Zustand laedt', str_contains($l, "nut/usv/zustand/laedt\t1"), true);

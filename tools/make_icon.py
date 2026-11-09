@@ -1,4 +1,4 @@
-"""Erzeugt die LoxBerry-Plugin-Icons nut/icons/icon_{64,128,256,512}.png.
+"""Erzeugt die LoxBerry-Plugin-Icons nut2lox/icons/icon_{64,128,256,512}.png.
 
 Aufruf (aus dem Repo-Ordner):  python tools/make_icon.py
 Benoetigt Pillow. Gruener LoxBerry-Stil: Batterie mit Blitz und Schriftzug NUT.
@@ -39,7 +39,7 @@ text = "NUT"
 w = d.textlength(text, font=f)
 d.text(((S - w) / 2, 640), text, font=f, fill=WHITE)
 
-out = os.path.join(ROOT, "nut", "icons")
+out = os.path.join(ROOT, "nut2lox", "icons")
 os.makedirs(out, exist_ok=True)
 for size in (64, 128, 256, 512):
     img.resize((size, size), Image.LANCZOS).save(os.path.join(out, "icon_%d.png" % size))

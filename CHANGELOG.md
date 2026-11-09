@@ -1,12 +1,18 @@
 # Changelog
 
-Alle nennenswerten Änderungen an NUT USV. Format angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
+Alle nennenswerten Änderungen an Nut2Lox. Format angelehnt an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 Versionierung nach [Semantic Versioning](https://semver.org/lang/de/) (`MAJOR.MINOR.PATCH`).
 
-Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erhöhen, hier einen Eintrag ergänzen,
+Release-Ablauf: Version in `nut2lox/plugin.cfg` und `nut2lox/bin/lib/AppVersion.php` erhöhen, hier einen Eintrag ergänzen,
 `bash build.sh` ausführen (prüft die Übereinstimmung), danach Git-Tag `vX.Y.Z` setzen.
 
 ## [Unveröffentlicht]
+
+## [0.5.0] – 2026-11-09
+
+### Geändert
+- **Plugin umbenannt in Nut2Lox** (Plugin-Name und -Ordner `nut2lox`, Titel „Nut2Lox“, ZIP `nut2lox-<version>.zip`), passend zum Repository und zu Senec2Lox. Die **Topics bleiben unverändert** (`nut/…`), Loxone-Eingänge sind nicht betroffen.
+- Für LoxBerry ist das ein **neues Plugin**: Das alte Plugin „nut“ muss deinstalliert werden. Die Einstellungen des alten Plugins (`nut.json`, `lokal.conf`) übernimmt `postinstall.sh` bei der Installation automatisch, sofern das alte Plugin noch installiert ist.
 
 ## [0.4.4] – 2026-11-09
 

@@ -1,10 +1,10 @@
 #!/bin/bash
 # Deinstallation (laeuft als root). Beendet den Dienst DIESES Plugin-Ordners und entfernt die RAM-Daten.
 # Argumente von LoxBerry: $1 Temp-Name, $2 Plugin-Name, $3 Plugin-Ordner, $4 Version, $5 LBHOMEDIR
-# Der Ordner kommt aus $3 (kann z. B. nut_000 heissen). Ein fest eingetragener Ordner wuerde den Dienst eines anderen Plugins beenden.
+# Der Ordner kommt aus $3 (kann z. B. nut2lox_000 heissen). Ein fest eingetragener Ordner wuerde den Dienst eines anderen Plugins beenden.
 # Die sudo-Erlaubnis des Plugins wird entfernt.
 # Der lokale NUT-Server (/etc/nut) und die Pakete bleiben bestehen - sie gehoeren dem System.
-FOLDER="${3:-nut}"
+FOLDER="${3:-nut2lox}"
 PIDFILE="/dev/shm/$FOLDER/nut.pid"
 
 if [ -f "$PIDFILE" ]; then

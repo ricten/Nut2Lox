@@ -1,8 +1,8 @@
 #!/bin/bash
-# Baut nut-<version>.zip aus nut/ plus den gemeinsamen Klassen aus ../common/php (ohne tests/, .git, docs/).
+# Baut nut2lox-<version>.zip aus nut2lox/ plus den gemeinsamen Klassen aus ../common/php (ohne tests/, .git, docs/).
 cd "$(dirname "$0")" || exit 1
-VER="$(grep '^VERSION=' nut/plugin.cfg | cut -d= -f2 | tr -d '\r')"
-CODEVER="$(grep -o "CURRENT = '[^']*'" nut/bin/lib/AppVersion.php | cut -d"'" -f2)"
+VER="$(grep '^VERSION=' nut2lox/plugin.cfg | cut -d= -f2 | tr -d '\r')"
+CODEVER="$(grep -o "CURRENT = '[^']*'" nut2lox/bin/lib/AppVersion.php | cut -d"'" -f2)"
 if [ "$VER" != "$CODEVER" ]; then
     echo "Versionen passen nicht: plugin.cfg=$VER, AppVersion.php=$CODEVER" >&2
     exit 1
@@ -20,7 +20,7 @@ PY="$(command -v python3 || command -v python)" || { echo "python noetig (ersetz
 STAGE="$PWD/build/stage"
 rm -rf build
 mkdir -p "$STAGE"
-cp -r nut/. "$STAGE/"
+cp -r nut2lox/. "$STAGE/"
 cp ../common/php/Util.php ../common/php/Logger.php ../common/php/MqttClient.php "$STAGE/bin/lib/"
 
 # PHP-Syntaxpruefung, sofern php vorhanden
@@ -36,8 +36,8 @@ for f in "$STAGE"/*.sh "$STAGE"/bin/*.sh "$STAGE"/cron/cron.01min "$STAGE"/daemo
     bash -n "$f" || { echo "Shell-Syntaxfehler in $f" >&2; exit 1; }
 done
 
-OUT="$PWD/nut-$VER.zip"
-rm -f nut-*.zip      # alte Installer entfernen, nur der aktuelle bleibt
+OUT="$PWD/nut2lox-$VER.zip"
+rm -f nut2lox-*.zip nut-*.zip      # alte Installer entfernen, nur der aktuelle bleibt
 "$PY" - "$OUT" "$STAGE" <<'PYEOF'
 import os, sys, zipfile
 out, root = sys.argv[1], sys.argv[2]

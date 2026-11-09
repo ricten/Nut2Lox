@@ -1,5 +1,5 @@
 <?php
-// Weboberflaeche NUT USV: Einstellungen · MQTT · Einbindung in Loxone · Test · Logdateien
+// Weboberflaeche Nut2Lox: Einstellungen · MQTT · Einbindung in Loxone · Test · Logdateien
 // Achtung: LBWeb::lbheader() und mqtt_connectiondetails() ueberschreiben die globale Variable $cfg -> eigene Konfiguration heisst $nut.
 
 require_once 'loxberry_system.php';
@@ -76,7 +76,7 @@ $alter = isset($status['time']) ? time() - (int)$status['time'] : null;
 $laeuft = $alter !== null && $alter <= 10;
 $basis = '?tab=';
 
-LBWeb::lbheader('NUT USV ' . AppVersion::CURRENT, '', '');
+LBWeb::lbheader('Nut2Lox ' . AppVersion::CURRENT, '', '');
 ?>
 <style>
  .nut-tabs a { display:inline-block; padding:6px 14px; margin:0 4px 8px 0; border:1px solid #999; border-radius:4px; text-decoration:none; color:inherit; }

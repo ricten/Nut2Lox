@@ -1,12 +1,12 @@
-# NUT USV – LoxBerry-Plugin
+# Nut2Lox – LoxBerry-Plugin
 
-**Version 0.4.4** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
+**Version 0.5.0** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
 
 Liest USV-Werte von NUT-Servern (Port 3493) und veröffentlicht sie per MQTT am LoxBerry-Broker (→ MQTT-Gateway → Loxone).
 Optional richtet das Plugin auf dem LoxBerry selbst einen NUT-Server für eine USB-USV ein. Ersetzt den ioBroker-Adapter `nut`.
 
 ## Installation
-1. `bash build.sh` → `nut-<version>.zip`
+1. `bash build.sh` → `nut2lox-<version>.zip`
 2. In LoxBerry → Plugin-Verwaltung → ZIP installieren (holt die Pakete `nut-server`, `nut-client`, `usbutils`).
 3. Plugin öffnen:
    - USV an einem anderen Gerät: unter „NUT-Server im Netz“ Host eintragen, aktivieren, speichern.
