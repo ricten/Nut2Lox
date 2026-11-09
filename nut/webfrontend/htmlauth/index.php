@@ -140,6 +140,10 @@ Ohne Name im Topic wird der USV-Name verwendet (nur a–z, 0–9, _ und -).</p>
 <tr><th>USB Vendor-ID / Product-ID</th><td>
 <input type="text" name="lokal[vendorid]" value="<?= h($l['vendorid']) ?>" size="5" maxlength="4" placeholder="optional">
  / <input type="text" name="lokal[productid]" value="<?= h($l['productid']) ?>" size="5" maxlength="4" placeholder="optional"></td></tr>
+<tr><th>Synology (DSM) als Client</th><td><label><input type="checkbox" name="lokal[synology]" value="1" <?= !empty($l['synology']) ? 'checked' : '' ?>>
+ Synology DiskStation soll diese USV als „Synology USV-Server“ nutzen</label><br>
+<span class="hinweis">DSM erwartet fest die USV <b>ups</b> und den Benutzer <b>monuser</b> mit Passwort <b>secret</b> (nicht änderbar). Das Plugin benennt die USV dann „ups“, gibt den Server im Netz frei und legt monuser nur als Client (slave) an.
+In DSM: Systemsteuerung → Hardware &amp; Energie → USV → USV-Unterstützung aktivieren, „Synology USV-Server“, IP des LoxBerry. Das feste Passwort ist bekannt – Port 3493 nur im Heimnetz erreichbar lassen.</span></td></tr>
 <tr><th>Im Netz freigeben</th><td><label><input type="checkbox" name="lokal[netz]" value="1" <?= !empty($l['netz']) ? 'checked' : '' ?>>
  NUT-Server auch für andere Geräte erreichbar (Port 3493)</label></td></tr>
 </table>

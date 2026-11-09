@@ -17,7 +17,7 @@ final class NutConfig
             'server' => [self::defaultServer('usv'), self::defaultServer(), self::defaultServer(), self::defaultServer()],
             'lokal' => [
                 'aktiv' => false, 'name' => 'usv', 'treiber' => 'usbhid-ups', 'vendorid' => '', 'productid' => '',
-                'netz' => false, 'benutzer' => 'nutplugin', 'passwort' => '',
+                'netz' => false, 'synology' => false, 'benutzer' => 'nutplugin', 'passwort' => '',
             ],
         ];
     }
@@ -87,13 +87,19 @@ final class NutConfig
         $name = Util::name((string)($l['name'] ?? ''));
         $vid = strtolower(trim((string)($l['vendorid'] ?? '')));
         $pid = strtolower(trim((string)($l['productid'] ?? '')));
+        // Synology als NUT-Client: erwartet fest die USV "ups" und Netzfreigabe
+        $syno = !empty($l['synology']);
+        if ($syno) {
+            $name = 'ups';
+        }
         $new['lokal'] = [
             'aktiv' => !empty($l['aktiv']),
+            'synology' => $syno,
             'name' => $name !== '' ? $name : 'usv',
             'treiber' => in_array($l['treiber'] ?? '', self::TREIBER, true) ? $l['treiber'] : 'usbhid-ups',
             'vendorid' => preg_match('/^[0-9a-f]{4}$/', $vid) ? $vid : '',
             'productid' => preg_match('/^[0-9a-f]{4}$/', $pid) ? $pid : '',
-            'netz' => !empty($l['netz']),
+            'netz' => $syno || !empty($l['netz']),
             'benutzer' => $o['benutzer'] !== '' ? $o['benutzer'] : 'nutplugin',
             'passwort' => $o['passwort'] !== '' ? $o['passwort'] : bin2hex(random_bytes(12)),
         ];
@@ -110,6 +116,7 @@ final class NutConfig
             'vendorid=' . $l['vendorid'],
             'productid=' . $l['productid'],
             'netz=' . (empty($l['netz']) ? '0' : '1'),
+            'synology=' . (empty($l['synology']) ? '0' : '1'),
             'benutzer=' . $l['benutzer'],
             'passwort=' . $l['passwort'],
         ];

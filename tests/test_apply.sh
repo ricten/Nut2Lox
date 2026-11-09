@@ -29,6 +29,17 @@ bash "$APPLY" apply >/dev/null 2>&1; grep -q "LISTEN 0.0.0.0 3493" "$T/etc/upsd.
 # zweiter Lauf ueberschreibt die Sicherung nicht
 bash "$APPLY" apply >/dev/null 2>&1; [ "$(cat "$T/etc/ups.conf.vor-nut-plugin")" = "# fremde Konfiguration" ] && ok "Sicherung bleibt" || fail "Sicherung ueberschrieben"
 
+# Synology-Modus: USV muss ups heissen, monuser als slave, Netzfreigabe erzwungen
+printf 'aktiv=1\nname=usv\ntreiber=usbhid-ups\nvendorid=\nproductid=\nnetz=0\nsynology=1\nbenutzer=nutplugin\npasswort=abcdef0123456789\n' > "$CONF"
+bash "$APPLY" apply >/dev/null 2>&1 && fail "Synology mit Name usv abgelehnt" || ok "Synology mit Name usv abgelehnt"
+sed -i 's|^name=usv|name=ups|' "$CONF"
+bash "$APPLY" apply >/dev/null 2>&1 && ok "Synology apply" || fail "Synology apply"
+grep -q "^\[ups\]" "$T/etc/ups.conf" && ok "Synology: USV heisst ups" || fail "Synology: Name"
+grep -q "^\[monuser\]" "$T/etc/upsd.users" && grep -q "upsmon slave" "$T/etc/upsd.users" && grep -q "password = secret" "$T/etc/upsd.users" && ok "Synology: monuser slave" || fail "Synology: monuser"
+grep -q "LISTEN 0.0.0.0 3493" "$T/etc/upsd.conf" && ok "Synology: Netzfreigabe erzwungen" || fail "Synology: Netz"
+printf 'aktiv=1\nname=usv\ntreiber=usbhid-ups\nvendorid=051d\nproductid=0002\nnetz=1\nsynology=0\nbenutzer=nutplugin\npasswort=abcdef0123456789\n' > "$CONF"
+bash "$APPLY" apply >/dev/null 2>&1; ! grep -q "monuser" "$T/etc/upsd.users" && ok "ohne Synology kein monuser" || fail "monuser ohne Synology"
+
 # Ungueltige Werte werden abgelehnt
 for bad in 'name=a b' 'name=../x' 'treiber=rm' 'vendorid=zz' 'benutzer=x;y' 'passwort=kurz' 'passwort=abc def ghij k'; do
     key="${bad%%=*}"

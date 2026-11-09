@@ -36,7 +36,7 @@ esac
 declare -A C
 while IFS='=' read -r k v; do
     case "$k" in
-        aktiv|name|treiber|vendorid|productid|netz|benutzer|passwort) C[$k]="$v" ;;
+        aktiv|name|treiber|vendorid|productid|netz|synology|benutzer|passwort) C[$k]="$v" ;;
     esac
 done < "$CONF"
 
@@ -46,11 +46,13 @@ treiber="${C[treiber]:-usbhid-ups}"
 vendorid="${C[vendorid]:-}"
 productid="${C[productid]:-}"
 netz="${C[netz]:-0}"
+synology="${C[synology]:-0}"
 benutzer="${C[benutzer]:-nutplugin}"
 passwort="${C[passwort]:-}"
 
 [[ "$aktiv" =~ ^[01]$ ]] || die "aktiv ungueltig"
 [[ "$netz" =~ ^[01]$ ]] || die "netz ungueltig"
+[[ "$synology" =~ ^[01]$ ]] || die "synology ungueltig"
 
 ist_unser() { [ -f "$NUTDIR/nut.conf" ] && grep -qF "$MARK" "$NUTDIR/nut.conf"; }
 
@@ -70,6 +72,11 @@ if [ "$aktiv" = "0" ]; then
 fi
 
 [[ "$name" =~ ^[a-z0-9_-]{1,32}$ ]] || die "name ungueltig (a-z 0-9 _ -)"
+# Synology als NUT-Client: erwartet fest die USV "ups", den Benutzer monuser (Passwort secret, Rolle slave) und Zugriff ueber das Netz
+if [ "$synology" = "1" ]; then
+    [ "$name" = "ups" ] || die "Synology-Modus: Die USV muss ups heissen"
+    netz=1
+fi
 case "$treiber" in
     usbhid-ups|blazer_usb|nutdrv_qx|richcomm_usb|tripplite_usb|riello_usb|bcmxcp_usb) ;;
     *) die "treiber nicht erlaubt" ;;
@@ -125,6 +132,13 @@ umask 027
              test.panel.start test.panel.stop; do
         echo "    instcmds = $c"
     done
+    if [ "$synology" = "1" ]; then
+        # Synology-Vorgabe: Benutzer und Passwort sind in DSM fest (nicht aenderbar). Nur Lesezugriff als Client (slave).
+        echo
+        echo "[monuser]"
+        echo "    password = secret"
+        echo "    upsmon slave"
+    fi
 } > "$NUTDIR/upsd.users"
 
 if [ -n "${NUT_APPLY_ETC:-}" ]; then

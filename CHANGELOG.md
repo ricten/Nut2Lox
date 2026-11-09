@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.2.0] – 2026-11-09
+
+### Hinzugefügt
+- **Synology als NUT-Client:** Option „Synology (DSM) als Client“ beim lokalen NUT-Server. DSM erwartet fest die USV `ups` und den Benutzer `monuser` (Passwort `secret`, Rolle slave). Das Plugin benennt die USV dann `ups`, erzwingt die Netzfreigabe und legt `monuser` nur als Client an (`nut-apply.sh` prüft den Namen). Grundlage: bjoerns-techblog.de, „Synology DiskStation als NUT-Client“.
+
 ## [0.1.1] – 2026-11-09
 
 ### Behoben
