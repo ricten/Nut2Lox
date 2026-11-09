@@ -134,20 +134,19 @@ foreach ($tabs as $k => $t) {
 Ohne Name im Topic wird der USV-Name verwendet (nur a–z, 0–9, _ und -).</p>
 
 <h3>USV per USB am LoxBerry</h3>
-<?php $l = $nut['lokal'];
-[$led, $tip] = NutClient::check('127.0.0.1', 3493); ?>
-<p>Lokaler NUT-Server (127.0.0.1:3493): <span class="nut-led nut-led-<?= $led ?>"></span> <span class="hinweis"><?= h($tip) ?></span></p>
 <?php
-// Aus dem Netz erreichbar? Pruefung ueber die Netzwerkadresse, unter der diese Seite aufgerufen wurde (nicht ueber 127.0.0.1)
+$l = $nut['lokal'];
+// Eine Anzeige genuegt: ohne Netzfreigabe lauscht der Server auf 127.0.0.1, mit Freigabe auf 0.0.0.0 (deckt localhost mit ab).
+// Dann wird ueber die Netzwerkadresse geprueft, unter der diese Seite aufgerufen wurde.
 $lanIp = (string)($_SERVER['SERVER_ADDR'] ?? '');
-if ($lanIp !== '' && $lanIp !== '127.0.0.1' && $lanIp !== '::1') {
-    [$led2, $tip2] = NutClient::check($lanIp, 3493);
-    if ($led2 !== 'ok' && $led === 'ok') {
-        $tip2 = 'nicht erreichbar - lauscht der NUT-Server nur lokal? (Option „Im Netz freigeben“ bzw. Synology aktivieren, speichern, „Lokalen Server neu einrichten“)';
-    }
-    ?>
-<p>Aus dem Netz (<?= h($lanIp) ?>:3493): <span class="nut-led nut-led-<?= $led2 ?>"></span> <span class="hinweis"><?= h($tip2) ?></span></p>
-<?php } ?>
+$freigabe = !empty($l['netz']) || !empty($l['synology']);
+$addr = ($freigabe && $lanIp !== '' && $lanIp !== '::1') ? $lanIp : '127.0.0.1';
+[$led, $tip] = NutClient::check($addr, 3493);
+if ($led !== 'ok' && $addr !== '127.0.0.1' && NutClient::check('127.0.0.1', 3493)[0] === 'ok') {
+    $tip = 'nur lokal erreichbar - „Lokalen Server neu einrichten“ drücken (Netzfreigabe ist noch nicht aktiv)';
+}
+?>
+<p>Lokaler NUT-Server (<?= h($addr) ?>:3493<?= $addr === '127.0.0.1' ? ', nur lokal' : ', im Netz freigegeben' ?>): <span class="nut-led nut-led-<?= $led ?>"></span> <span class="hinweis"><?= h($tip) ?></span></p>
 <p><label><input type="checkbox" name="lokal[aktiv]" value="1" <?= !empty($l['aktiv']) ? 'checked' : '' ?>>
  Lokalen NUT-Server auf dem LoxBerry einrichten und abfragen</label></p>
 <table>

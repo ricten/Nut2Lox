@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.4.3] – 2026-11-09
+
+### Geändert
+- Beim lokalen NUT-Server gibt es nur noch **eine** Erreichbarkeitsanzeige: ohne Netzfreigabe wird 127.0.0.1 geprüft, mit Freigabe (oder Synology-Modus) die Netzwerkadresse des LoxBerry (0.0.0.0 deckt localhost mit ab). Lauscht der Server trotz Freigabe nur lokal, weist die Anzeige darauf hin.
+
 ## [0.4.2] – 2026-11-09
 
 ### Behoben
