@@ -22,11 +22,20 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 file_put_contents($paths->pidFile(), (string)getmypid());
 
 $log = new Logger($paths->logfile, 'Dienst', 'NUT-Dienst');
-if (getenv('NUT_DEV_DIR')) {
-    $log->setLevel(getenv('NUT_DEV_LOGLEVEL') ?: 'debug');
-} elseif (class_exists('LBSystem') && method_exists('LBSystem', 'pluginloglevel')) {
-    $log->setLoxberryLevel((int)LBSystem::pluginloglevel());
+/** Loglevel aus der LoxBerry-Pluginverwaltung (im Test NUT_DEV_LOGLEVEL). Wird im Betrieb regelmaessig neu gelesen. */
+function applyLogLevel(Logger $log): void
+{
+    if (getenv('NUT_DEV_DIR')) {
+        $log->setLevel(getenv('NUT_DEV_LOGLEVEL') ?: 'debug');
+    } elseif (class_exists('LBSystem') && method_exists('LBSystem', 'pluginloglevel')) {
+        $lvl = (int)LBSystem::pluginloglevel();
+        if ($lvl > 0) {
+            $log->setLoxberryLevel($lvl);
+        }
+    }
 }
+applyLogLevel($log);
+$logLevelCheck = 0;
 register_shutdown_function(function () use ($log) {
     $e = error_get_last();
     if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
@@ -243,6 +252,10 @@ $log->info('NUT-Dienst ' . AppVersion::CURRENT . ' gestartet (PID ' . getmypid()
 while ($running) {
     try {
         $now = time();
+        if ($now >= $logLevelCheck) {      // Loglevel-Aenderung der Pluginverwaltung ohne Neustart uebernehmen
+            $logLevelCheck = $now + 30;
+            applyLogLevel($log);
+        }
 
         // Konfiguration neu laden, wenn sich die Datei geaendert hat
         clearstatcache(true, $paths->config);

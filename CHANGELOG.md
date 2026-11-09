@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.4.4] – 2026-11-09
+
+### Behoben
+- **Loglevel in der Plugin-Verwaltung nicht einstellbar:** In `plugin.cfg` fehlte `LOGLEVELS_ENABLED=1`. Die Auswahl erscheint jetzt; der Dienst liest den Level alle 30 s neu und übernimmt eine Änderung ohne Neustart. Ohne gültigen Wert gilt Info.
+
 ## [0.4.3] – 2026-11-09
 
 ### Geändert
