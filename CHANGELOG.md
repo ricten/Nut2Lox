@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.2.1] – 2026-11-09
+
+### Behoben
+- Plugin-Icons fehlten (Installer meldete „Icons could not be installed“). `nut/icons/icon_{64,128,256,512}.png` liegen jetzt im ZIP; erzeugt mit `python tools/make_icon.py`.
+
 ## [0.2.0] – 2026-11-09
 
 ### Hinzugefügt
