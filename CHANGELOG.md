@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.4.1] – 2026-11-09
+
+### Hinzugefügt
+- Beim lokalen NUT-Server zeigt eine zweite Anzeige, ob er auch **aus dem Netz** erreichbar ist (Prüfung über die Adresse, unter der die Seite aufgerufen wurde). Bisher prüfte nur 127.0.0.1; ein Server, der nur lokal lauscht, erschien trotzdem grün, obwohl z. B. eine Synology ihn nicht erreichte.
+
 ## [0.4.0] – 2026-11-09
 
 ### Hinzugefügt
