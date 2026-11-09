@@ -4,7 +4,7 @@ Der Weg: **NUT-Server → Nut2Lox → LoxBerry-MQTT-Broker → LoxBerry-MQTT-Gat
 
 ## 1. MQTT-Gateway einrichten
 
-Das Plugin trägt sein Abonnement `nut/#` selbst in `mqtt_subscriptions.cfg` ein. Im **MQTT Gateway** prüfen, dass es unter „Abonnements“ erscheint. Mit **eigenem Broker** (Einstellung im Plugin) bekommt der Miniserver die Werte nur, wenn das Gateway diesen Broker abonniert.
+Das Plugin trägt sein Abonnement `nut/#` selbst in `mqtt_subscriptions.cfg` ein. Im **MQTT Gateway** prüfen, dass es unter „Abonnements“ erscheint. Mit **eigenem Broker** (Reiter MQTT) bekommt der Miniserver die Werte nur, wenn das Gateway diesen Broker abonniert.
 
 Für Lebenszeichen und Fehlererkennung die Topics `nut/status/ok` und `nut/status/zaehler` im Gateway auf **No Cache** stellen.
 
@@ -33,7 +33,7 @@ Hinweise:
 
 ## Befehle aus Loxone
 
-Befehle sind ab Werk **gesperrt**; freigeben unter *Einstellungen → Befehle aus Loxone freigeben*. Erlaubt sind nur Piepser (`beeper_*`) und Tests (`test_battery_*`, `test_panel_*`), nie Abschalten oder „Last aus“. Für Befehle muss beim NUT-Server ein Benutzer mit Passwort eingetragen sein (beim lokalen Server legt das Plugin ihn selbst an).
+Befehle sind ab Werk **gesperrt**; freigeben unter *Einstellungen USV/NUT → Befehle aus Loxone freigeben*. Erlaubt sind nur Piepser (`beeper_*`) und Tests (`test_battery_*`, `test_panel_*`), nie Abschalten oder „Last aus“. Für Befehle muss beim NUT-Server ein Benutzer mit Passwort eingetragen sein (beim lokalen Server legt das Plugin ihn selbst an).
 
 Virtueller Ausgang in Loxone Config:
 

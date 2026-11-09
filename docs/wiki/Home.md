@@ -14,7 +14,7 @@
 - **Befehle aus Loxone** (Piepser, Batterietest): ab Werk gesperrt, mit Quittung
 - MQTT-Broker des LoxBerry oder **eigener Broker** (Host, Port, Benutzer, Passwort)
 - Lebenszeichen `nut/status/ok|zaehler|ts` für die Ausfallerkennung in Loxone
-- Weboberfläche mit Einstellungen, Erreichbarkeitsanzeige, Topic-Tabelle, Selbstprüfung und Log
+- Weboberfläche mit Einstellungen USV/NUT, MQTT-Reiter, Erreichbarkeitsanzeige, Topic-Tabelle, Selbstprüfung und Log
 
 ## Seiten
 

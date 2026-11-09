@@ -8,6 +8,12 @@ Release-Ablauf: Version in `nut2lox/plugin.cfg` und `nut2lox/bin/lib/AppVersion.
 
 ## [Unveröffentlicht]
 
+## [0.7.0] – 2026-11-09
+
+### Geändert
+- **Menü neu geordnet:** Die MQTT-Broker-Einstellungen (eigener Broker) liegen jetzt im Reiter **MQTT** (unter dem Status), der Reiter „Einstellungen“ heißt **„Einstellungen USV/NUT“** und enthält Allgemein, NUT-Server im Netz und den lokalen USB-Server.
+- Jeder Reiter speichert nur seine eigenen Einstellungen; die der anderen Reiter bleiben unverändert (`NutConfig::fromPost` arbeitet abschnittsweise).
+
 ## [0.6.0] – 2026-11-09
 
 ### Hinzugefügt

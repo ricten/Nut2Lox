@@ -93,7 +93,7 @@ LBWeb::lbheader('Nut2Lox ' . AppVersion::CURRENT, '', '');
 <div class="nut">
 <div class="nut-tabs">
 <?php
-$tabs = ['einstellungen' => 'Einstellungen', 'mqtt' => 'MQTT', 'loxone' => 'Einbindung in Loxone', 'test' => 'Test', 'logs' => 'Logdateien'];
+$tabs = ['einstellungen' => 'Einstellungen USV/NUT', 'mqtt' => 'MQTT', 'loxone' => 'Einbindung in Loxone', 'test' => 'Test', 'logs' => 'Logdateien'];
 foreach ($tabs as $k => $t) {
     echo '<a href="' . $basis . $k . '" class="' . ($tab === $k ? 'aktiv' : '') . '" data-ajax="false">' . h($t) . '</a>';
 }
@@ -112,18 +112,6 @@ foreach ($tabs as $k => $t) {
 <p><label><input type="checkbox" name="befehle_frei" value="1" <?= $nut['befehle_frei'] ? 'checked' : '' ?>>
  Befehle aus Loxone freigeben (Piepser, Batterietest)</label><br>
 <span class="hinweis">Ab Werk gesperrt. Erlaubt sind nur beeper.* und test.battery.* / test.panel.* – nie Abschalten oder Last aus.</span></p>
-
-<h3>MQTT-Broker</h3>
-<?php $mq = $nut['mqtt']; ?>
-<p><label><input type="checkbox" name="mqtt[eigener_broker]" value="1" <?= !empty($mq['eigener_broker']) ? 'checked' : '' ?>>
- Eigenen MQTT-Broker verwenden (statt dem Broker des LoxBerry)</label></p>
-<table>
-<tr><th>Host/IP</th><td><input type="text" name="mqtt[host]" value="<?= h($mq['host']) ?>" size="24"></td>
-<th>Port</th><td><input type="number" name="mqtt[port]" value="<?= (int)$mq['port'] ?>" style="width:90px"></td></tr>
-<tr><th>Benutzer</th><td><input type="text" name="mqtt[benutzer]" value="<?= h($mq['benutzer']) ?>" size="16" autocomplete="off"></td>
-<th>Passwort</th><td><input type="password" name="mqtt[passwort]" value="" size="16" autocomplete="new-password" placeholder="<?= $mq['passwort'] !== '' ? '(gesetzt)' : '' ?>"></td></tr>
-</table>
-<p class="hinweis">Ohne Haken verwendet das Plugin den MQTT-Broker aus der LoxBerry-Konfiguration (empfohlen, Zugangsdaten verwaltet LoxBerry). Mit eigenem Broker erreichen die Werte den Miniserver nur, wenn das MQTT-Gateway diesen Broker abonniert. Ein leeres Passwortfeld behält das gespeicherte Passwort.</p>
 
 <h3>NUT-Server im Netz</h3>
 <table>
@@ -202,7 +190,21 @@ Bestehende Dateien werden einmalig als *.vor-nut-plugin gesichert. Ist die Optio
 <?php foreach (($status['server'] ?? []) as $a => $r) {
     echo '<p>' . h($a) . ': ' . (!empty($r['ok']) ? '<span class="ok">erreichbar</span>' : '<span class="fehler">' . h($r['error'] ?? 'Fehler') . '</span>') . '</p>';
 } ?>
-<p class="hinweis">Standard: Zugangsdaten zum Broker verwaltet LoxBerry (MQTT-Gateway), das Plugin hat keine eigenen. Nur bei „Eigenen MQTT-Broker verwenden“ liegen sie in der Plugin-Konfiguration (Rechte 0600) und werden nie angezeigt oder geloggt.</p>
+<form method="post" action="<?= $basis ?>mqtt" data-ajax="false">
+<input type="hidden" name="token" value="<?= h($token) ?>">
+<h3>MQTT-Broker</h3>
+<?php $mq = $nut['mqtt']; ?>
+<p><label><input type="checkbox" name="mqtt[eigener_broker]" value="1" <?= !empty($mq['eigener_broker']) ? 'checked' : '' ?>>
+ Eigenen MQTT-Broker verwenden (statt dem Broker des LoxBerry)</label></p>
+<table>
+<tr><th>Host/IP</th><td><input type="text" name="mqtt[host]" value="<?= h($mq['host']) ?>" size="24"></td>
+<th>Port</th><td><input type="number" name="mqtt[port]" value="<?= (int)$mq['port'] ?>" style="width:90px"></td></tr>
+<tr><th>Benutzer</th><td><input type="text" name="mqtt[benutzer]" value="<?= h($mq['benutzer']) ?>" size="16" autocomplete="off"></td>
+<th>Passwort</th><td><input type="password" name="mqtt[passwort]" value="" size="16" autocomplete="new-password" placeholder="<?= $mq['passwort'] !== '' ? '(gesetzt)' : '' ?>"></td></tr>
+</table>
+<p class="hinweis">Ohne Haken verwendet das Plugin den MQTT-Broker aus der LoxBerry-Konfiguration (empfohlen, Zugangsdaten verwaltet LoxBerry). Mit eigenem Broker erreichen die Werte den Miniserver nur, wenn das MQTT-Gateway diesen Broker abonniert. Ein leeres Passwortfeld behält das gespeicherte Passwort.</p>
+<p><button type="submit" name="aktion" value="speichern" data-ajax="false">Speichern</button></p>
+</form>
 
 <?php } elseif ($tab === 'loxone') {
     $aliase = array_map(fn($s) => $s['alias'], NutConfig::servers($nut)) ?: ['usv'];

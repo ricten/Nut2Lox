@@ -69,51 +69,60 @@ final class NutConfig
     public static function fromPost(array $old, array $post): array
     {
         $new = $old;
-        $new['intervall'] = max(2, min(300, (int)($post['intervall'] ?? 10)));
-        $new['befehle_frei'] = !empty($post['befehle_frei']);
-        $m = is_array($post['mqtt'] ?? null) ? $post['mqtt'] : [];
-        $mpw = (string)($m['passwort'] ?? '');
-        $new['mqtt'] = [
-            'eigener_broker' => !empty($m['eigener_broker']),
-            'host' => (string)preg_replace('/[^A-Za-z0-9_.:-]/', '', trim((string)($m['host'] ?? ''))),
-            'port' => max(1, min(65535, (int)($m['port'] ?? 1883))),
-            'benutzer' => trim((string)($m['benutzer'] ?? '')),
-            'passwort' => $mpw !== '' ? $mpw : (string)$old['mqtt']['passwort'],
-        ];
-        for ($i = 0; $i < 4; $i++) {
-            $p = is_array($post['srv'][$i] ?? null) ? $post['srv'][$i] : [];
-            $pw = (string)($p['passwort'] ?? '');
-            $new['server'][$i] = [
-                'aktiv' => !empty($p['aktiv']),
-                'alias' => Util::name((string)($p['alias'] ?? '')),
-                'host' => trim((string)($p['host'] ?? '')),
-                'port' => max(1, min(65535, (int)($p['port'] ?? 3493))),
-                'ups' => (string)preg_replace('/[^A-Za-z0-9_.@-]/', '', (string)($p['ups'] ?? '')),
-                'benutzer' => (string)preg_replace('/[^A-Za-z0-9_.@-]/', '', (string)($p['benutzer'] ?? '')),
-                'passwort' => $pw !== '' ? $pw : $old['server'][$i]['passwort'],
+        // Jeder Reiter der Oberflaeche sendet nur seine Abschnitte; fehlende bleiben unveraendert.
+        if (isset($post['intervall'])) {
+            $new['intervall'] = max(2, min(300, (int)$post['intervall']));
+            $new['befehle_frei'] = !empty($post['befehle_frei']);
+        }
+        if (is_array($post['mqtt'] ?? null)) {
+            $m = is_array($post['mqtt'] ?? null) ? $post['mqtt'] : [];
+            $mpw = (string)($m['passwort'] ?? '');
+            $new['mqtt'] = [
+                'eigener_broker' => !empty($m['eigener_broker']),
+                'host' => (string)preg_replace('/[^A-Za-z0-9_.:-]/', '', trim((string)($m['host'] ?? ''))),
+                'port' => max(1, min(65535, (int)($m['port'] ?? 1883))),
+                'benutzer' => trim((string)($m['benutzer'] ?? '')),
+                'passwort' => $mpw !== '' ? $mpw : (string)$old['mqtt']['passwort'],
             ];
         }
-        $l = is_array($post['lokal'] ?? null) ? $post['lokal'] : [];
-        $o = $old['lokal'];
-        $name = Util::name((string)($l['name'] ?? ''));
-        $vid = strtolower(trim((string)($l['vendorid'] ?? '')));
-        $pid = strtolower(trim((string)($l['productid'] ?? '')));
-        // Synology als NUT-Client: erwartet fest die USV "ups" und Netzfreigabe
-        $syno = !empty($l['synology']);
-        if ($syno) {
-            $name = 'ups';
+        if (is_array($post['srv'] ?? null)) {
+            for ($i = 0; $i < 4; $i++) {
+                $p = is_array($post['srv'][$i] ?? null) ? $post['srv'][$i] : [];
+                $pw = (string)($p['passwort'] ?? '');
+                $new['server'][$i] = [
+                    'aktiv' => !empty($p['aktiv']),
+                    'alias' => Util::name((string)($p['alias'] ?? '')),
+                    'host' => trim((string)($p['host'] ?? '')),
+                    'port' => max(1, min(65535, (int)($p['port'] ?? 3493))),
+                    'ups' => (string)preg_replace('/[^A-Za-z0-9_.@-]/', '', (string)($p['ups'] ?? '')),
+                    'benutzer' => (string)preg_replace('/[^A-Za-z0-9_.@-]/', '', (string)($p['benutzer'] ?? '')),
+                    'passwort' => $pw !== '' ? $pw : $old['server'][$i]['passwort'],
+                ];
+            }
         }
-        $new['lokal'] = [
-            'aktiv' => !empty($l['aktiv']),
-            'synology' => $syno,
-            'name' => $name !== '' ? $name : 'usv',
-            'treiber' => in_array($l['treiber'] ?? '', self::TREIBER, true) ? $l['treiber'] : 'usbhid-ups',
-            'vendorid' => preg_match('/^[0-9a-f]{4}$/', $vid) ? $vid : '',
-            'productid' => preg_match('/^[0-9a-f]{4}$/', $pid) ? $pid : '',
-            'netz' => $syno || !empty($l['netz']),
-            'benutzer' => $o['benutzer'] !== '' ? $o['benutzer'] : 'nutplugin',
-            'passwort' => $o['passwort'] !== '' ? $o['passwort'] : bin2hex(random_bytes(12)),
-        ];
+        if (is_array($post['lokal'] ?? null)) {
+            $l = is_array($post['lokal'] ?? null) ? $post['lokal'] : [];
+            $o = $old['lokal'];
+            $name = Util::name((string)($l['name'] ?? ''));
+            $vid = strtolower(trim((string)($l['vendorid'] ?? '')));
+            $pid = strtolower(trim((string)($l['productid'] ?? '')));
+            // Synology als NUT-Client: erwartet fest die USV "ups" und Netzfreigabe
+            $syno = !empty($l['synology']);
+            if ($syno) {
+                $name = 'ups';
+            }
+            $new['lokal'] = [
+                'aktiv' => !empty($l['aktiv']),
+                'synology' => $syno,
+                'name' => $name !== '' ? $name : 'usv',
+                'treiber' => in_array($l['treiber'] ?? '', self::TREIBER, true) ? $l['treiber'] : 'usbhid-ups',
+                'vendorid' => preg_match('/^[0-9a-f]{4}$/', $vid) ? $vid : '',
+                'productid' => preg_match('/^[0-9a-f]{4}$/', $pid) ? $pid : '',
+                'netz' => $syno || !empty($l['netz']),
+                'benutzer' => $o['benutzer'] !== '' ? $o['benutzer'] : 'nutplugin',
+                'passwort' => $o['passwort'] !== '' ? $o['passwort'] : bin2hex(random_bytes(12)),
+            ];
+        }
         return $new;
     }
 

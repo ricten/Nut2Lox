@@ -5,7 +5,7 @@ Hängt die USV per USB am LoxBerry, richtet das Plugin auf Wunsch einen NUT-Serv
 ## Einrichten
 
 1. USV per USB an den LoxBerry anschließen.
-2. Einstellungen → **USB-Geräte suchen**. Die Ausgabe zeigt Treiber sowie Vendor- und Product-ID (Beispiel CyberPower: `usbhid-ups`, `0764`/`0601`). Die Meldungen „Cannot load SNMP/XML/IPMI library“ sind harmlos.
+2. Reiter „Einstellungen USV/NUT“ → **USB-Geräte suchen**. Die Ausgabe zeigt Treiber sowie Vendor- und Product-ID (Beispiel CyberPower: `usbhid-ups`, `0764`/`0601`). Die Meldungen „Cannot load SNMP/XML/IPMI library“ sind harmlos.
 3. Unter **USV per USB am LoxBerry** den Haken **Lokalen NUT-Server einrichten** setzen, ggf. Treiber und IDs eintragen, **Speichern**.
 4. Das Kästchen „Lokaler NUT-Server“ wird grün, sobald der Treiber läuft (kann einige Sekunden dauern).
 

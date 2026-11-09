@@ -1,9 +1,9 @@
 # Konfiguration
 
 Alle Einstellungen stehen in der Plugin-Oberfläche. Änderungen wirken **ohne Neustart** (der Dienst lädt die Konfiguration neu, sobald sich die Datei ändert).
-Reiter: **Einstellungen · MQTT · Einbindung in Loxone · Test · Logdateien**.
+Reiter: **Einstellungen USV/NUT · MQTT · Einbindung in Loxone · Test · Logdateien**. Jeder Reiter speichert nur seine eigenen Einstellungen; die der anderen Reiter bleiben unverändert.
 
-## Einstellungen
+## Einstellungen USV/NUT
 
 ### Allgemein
 
@@ -11,20 +11,6 @@ Reiter: **Einstellungen · MQTT · Einbindung in Loxone · Test · Logdateien**.
 |---|---|---|
 | Abfrageintervall | 10 s | Wie oft die NUT-Server abgefragt werden (2–300 s). Die `info/*`-Topics werden unabhängig davon alle 60 s aktualisiert |
 | Befehle aus Loxone freigeben | aus | Erlaubt Piepser und Batterietest per MQTT. Ab Werk **gesperrt**; nie erlaubt sind Abschalten und „Last aus“ |
-
-### MQTT-Broker
-
-Standard: Das Plugin nutzt den **MQTT-Broker des LoxBerry**; Host, Port und Zugangsdaten kommen aus der LoxBerry-Konfiguration (MQTT-Gateway). Das Plugin hat dann keine eigenen Zugangsdaten.
-
-Mit **Eigenen MQTT-Broker verwenden** lässt sich stattdessen ein anderer Broker eintragen:
-
-| Einstellung | Standard | Beschreibung |
-|---|---|---|
-| Host/IP | leer | Adresse des Brokers. Bei leerem Host gilt weiter der LoxBerry-Broker |
-| Port | 1883 | Unverschlüsselt; TLS wird nicht unterstützt |
-| Benutzer, Passwort | leer | Optional. Das Passwort wird nie angezeigt oder geloggt; ein leeres Feld behält das gespeicherte |
-
-Eine Änderung wirkt ohne Neustart: der Dienst trennt und verbindet neu. Die Selbstprüfung testet den gewählten Broker. **Wichtig:** Mit eigenem Broker erreichen die Werte den Miniserver nur, wenn das MQTT-Gateway diesen Broker abonniert.
 
 ### NUT-Server im Netz
 
@@ -46,7 +32,21 @@ Siehe [Lokaler NUT-Server](Lokaler-NUT-Server).
 
 ## MQTT
 
-Zeigt den verwendeten Broker (LoxBerry oder eigener), Gateway-Abo, Dienst- und Verbindungsstatus, den Zustand jedes NUT-Servers sowie `status/ok`, `status/zaehler` und `status/ts`.
+Oben der Status: verwendeter Broker (LoxBerry oder eigener), Gateway-Abo, Dienst- und Verbindungsstatus, Zustand jedes NUT-Servers sowie `status/ok`, `status/zaehler` und `status/ts`. Darunter die Broker-Einstellungen.
+
+### MQTT-Broker (eigener Broker)
+
+Standard: Das Plugin nutzt den **MQTT-Broker des LoxBerry**; Host, Port und Zugangsdaten kommen aus der LoxBerry-Konfiguration (MQTT-Gateway). Das Plugin hat dann keine eigenen Zugangsdaten.
+
+Mit **Eigenen MQTT-Broker verwenden** lässt sich stattdessen ein anderer Broker eintragen:
+
+| Einstellung | Standard | Beschreibung |
+|---|---|---|
+| Host/IP | leer | Adresse des Brokers. Bei leerem Host gilt weiter der LoxBerry-Broker |
+| Port | 1883 | Unverschlüsselt; TLS wird nicht unterstützt |
+| Benutzer, Passwort | leer | Optional. Das Passwort wird nie angezeigt oder geloggt; ein leeres Feld behält das gespeicherte |
+
+Eine Änderung wirkt ohne Neustart: der Dienst trennt und verbindet neu. Die Selbstprüfung testet den gewählten Broker. **Wichtig:** Mit eigenem Broker erreichen die Werte den Miniserver nur, wenn das MQTT-Gateway diesen Broker abonniert.
 
 ## Einbindung in Loxone
 

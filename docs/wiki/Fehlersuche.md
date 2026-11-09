@@ -17,7 +17,7 @@ Zuerst: Plugin öffnen → **Test → Selbstprüfung** (Konfiguration, NUT-Serve
 | Lokaler Server nur lokal erreichbar (Hinweis in der Anzeige) | **Lokalen Server neu einrichten**. Prüfen: `ss -ltnp \| grep 3493` zeigt bei Freigabe `0.0.0.0:3493`, sonst `127.0.0.1:3493` |
 | Synology: „Verbindung zum Netzwerk-USV-Server nicht möglich“ | Netzfreigabe aktiv? (Synology-Haken setzt sie.) `ss -ltnp \| grep 3493` muss `0.0.0.0` zeigen; sonst „Lokalen Server neu einrichten“ |
 | Synology: „Keine USV angeschlossen“ | In DSM *USV-Unterstützung aktivieren* nicht angehakt, oder USV heißt nicht `ups` |
-| Befehl: `abgelehnt: Befehle sind gesperrt` | Freigabe in den Einstellungen fehlt |
+| Befehl: `abgelehnt: Befehle sind gesperrt` | Freigabe unter „Einstellungen USV/NUT“ fehlt |
 | Befehl: `abgelehnt: NUT: ACCESS-DENIED` / „Anmeldung fehlgeschlagen“ | Benutzer/Passwort beim Server prüfen (Selbstprüfung → Anmeldung) |
 | Befehl: `abgelehnt: NUT: CMD-NOT-SUPPORTED` | Die USV kennt den Befehl nicht (siehe `info/befehle`) |
 | Loglevel nicht einstellbar | Ab 0.4.4 in der Plugin-Verwaltung verfügbar |

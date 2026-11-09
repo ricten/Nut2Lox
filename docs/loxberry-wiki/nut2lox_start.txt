@@ -5,9 +5,9 @@
 ^ Autor | Rico Tengler |
 ^ Logo | {{:plugins:nut2lox:logo_loxberry.png?64|Nut2Lox}} |
 ^ Status | BETA |
-^ Version | 0.6.0 |
+^ Version | 0.7.0 |
 ^ Min. LB Version | 4.0 (benötigt PHP 8.4) |
-^ Release Download | [[https://github.com/ricten/Nut2Lox/releases/latest|GitHub Releases (aktuelle Version)]] \\ [[https://github.com/ricten/Nut2Lox/releases/download/v0.6.0/nut2lox-0.6.0.zip|nut2lox-0.6.0.zip]] |
+^ Release Download | [[https://github.com/ricten/Nut2Lox/releases/latest|GitHub Releases (aktuelle Version)]] \\ [[https://github.com/ricten/Nut2Lox/releases/download/v0.7.0/nut2lox-0.7.0.zip|nut2lox-0.7.0.zip]] |
 ^ Pre-Release Download | - |
 ^ Quellcode | [[https://github.com/ricten/Nut2Lox|github.com/ricten/Nut2Lox]] (MIT-Lizenz) |
 ^ Beschreibung | Liest USV-Werte über das NUT-Protokoll (Network UPS Tools) aus und veröffentlicht sie per MQTT. Über das LoxBerry-MQTT-Gateway gelangen sie an den Loxone Miniserver. Optional richtet das Plugin einen NUT-Server für eine USB-USV am LoxBerry ein, auch für eine Synology DiskStation als Client. |
@@ -52,7 +52,7 @@ Plugin entfernen. Dienst, RAM-Daten und sudo-Erlaubnis werden gelöscht. ''/etc/
 
 ===== 3. Konfiguration (LoxBerry) =====
 
-Reiter: **Einstellungen · MQTT · Einbindung in Loxone · Test · Logdateien**. Änderungen wirken ohne Neustart.
+Reiter: **Einstellungen USV/NUT · MQTT · Einbindung in Loxone · Test · Logdateien**. Änderungen wirken ohne Neustart; jeder Reiter speichert nur seine eigenen Einstellungen.
 
 ==== 3.1 Allgemein ====
 
@@ -60,7 +60,7 @@ Reiter: **Einstellungen · MQTT · Einbindung in Loxone · Test · Logdateien**.
 | Abfrageintervall | 10 s | 2–300 s |
 | Befehle aus Loxone freigeben | aus | Piepser und Batterietest. Nie erlaubt: Abschalten, „Last aus“ |
 
-==== 3.2 MQTT-Broker ====
+==== 3.2 MQTT-Broker (Reiter MQTT) ====
 
 ^ Einstellung ^ Standard ^ Beschreibung ^
 | Eigenen MQTT-Broker verwenden | aus | Aus: Broker des LoxBerry (Zugangsdaten verwaltet LoxBerry) |
@@ -157,6 +157,7 @@ Weitere Hinweise: [[https://github.com/ricten/Nut2Lox/blob/main/docs/wiki/Fehler
 ===== 8. Changelog =====
 
 ^ Version ^ Änderung ^
+| 0.7.0 | Menü: MQTT-Broker im Reiter MQTT, Reiter „Einstellungen USV/NUT“ |
 | 0.6.0 | Eigener MQTT-Broker einstellbar, rundes Logo, Dokumentation |
 | 0.5.0 | Plugin umbenannt in Nut2Lox (Topics unverändert) |
 | 0.4.x | Erreichbarkeitsanzeige, upsd lauscht bei Freigabe auf 0.0.0.0, Loglevel-Auswahl |
