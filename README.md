@@ -32,3 +32,6 @@ Quelle: https://www.bjoerns-techblog.de/2024/04/synology-diskstation-als-nut-cli
 
 ## Noch nicht auf einem LoxBerry geprüft
 Weboberfläche, LoxBerry-Logging, Format von `config/mqtt_subscriptions.cfg`, Dienstnamen von NUT unter Debian 12 (`nut-driver@…`), `sudo -n` für den Benutzer loxberry, Paketlisten `dpkg/apt12`.
+
+## Lizenz
+MIT, siehe [LICENSE](LICENSE).
