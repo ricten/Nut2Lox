@@ -271,6 +271,22 @@ final class NutClient
         return [$c, $ups];
     }
 
+    /** Erreichbarkeit pruefen (Verbindung + USV-Liste, kurze Zeitgrenze). @return array{0:string,1:string} [ok|fehler, Text] */
+    public static function check(string $host, int $port): array
+    {
+        $c = new self($host, $port, 2);
+        if (!$c->connect()) {
+            return ['fehler', 'nicht erreichbar'];
+        }
+        $list = $c->listUps();
+        $err = $c->error;
+        $c->close();
+        if (!$list) {
+            return ['fehler', $err !== '' ? $err : 'erreichbar, aber keine USV'];
+        }
+        return ['ok', 'erreichbar, USV: ' . implode(', ', array_keys($list))];
+    }
+
     /** Wert fuer MQTT: ohne Zeilenumbrueche. Zahlen bleiben unveraendert (Punkt). */
     public static function value(string $v): string
     {

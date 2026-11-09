@@ -172,6 +172,8 @@ check('instcmd nicht unterstuetzt', $cl->instcmd('usv', 'beeper.mute', 'test', '
 $cl->close();
 $cl = new NutClient('127.0.0.1', 1);
 check('nicht erreichbar', $cl->connect(), false);
+check('check erreichbar', NutClient::check('127.0.0.1', $nutPort), ['ok', 'erreichbar, USV: usv']);
+check('check nicht erreichbar', NutClient::check('127.0.0.1', 1), ['fehler', 'nicht erreichbar']);
 
 // ---------------------------------------------------------------- Unit: MQTT-Client gegen Fake-Broker
 $mq = new MqttClient('127.0.0.1', $mqPort, '', '', 'unit_test', 'unit/will');

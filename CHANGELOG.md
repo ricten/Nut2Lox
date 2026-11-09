@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.4.0] – 2026-11-09
+
+### Hinzugefügt
+- **Erreichbarkeitsanzeige** in den Einstellungen: Vor jedem NUT-Server und beim lokalen Server zeigt ein grünes (erreichbar, mit USV-Namen), rotes (nicht erreichbar oder Fehler) oder graues Kästchen (kein Host eingetragen) den Zustand. Die Prüfung läuft beim Öffnen der Seite live, auch bevor der Server aktiviert ist (Zeitgrenze 2 s je Server).
+
 ## [0.3.1] – 2026-11-09
 
 ### Behoben
