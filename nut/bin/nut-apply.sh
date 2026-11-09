@@ -118,8 +118,13 @@ umask 027
 
 {
     echo "$MARK"
-    echo "LISTEN 127.0.0.1 3493"
-    [ "$netz" = "1" ] && echo "LISTEN 0.0.0.0 3493"
+    # Nur EINE Zeile: 0.0.0.0 deckt 127.0.0.1 mit ab; beide Zeilen zusammen kollidieren (der zweite Bind scheitert,
+    # upsd laeuft dann nur auf der ersten Adresse weiter).
+    if [ "$netz" = "1" ]; then
+        echo "LISTEN 0.0.0.0 3493"
+    else
+        echo "LISTEN 127.0.0.1 3493"
+    fi
 } > "$NUTDIR/upsd.conf"
 
 {

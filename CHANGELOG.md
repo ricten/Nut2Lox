@@ -8,6 +8,11 @@ Release-Ablauf: Version in `nut/plugin.cfg` und `nut/bin/lib/AppVersion.php` erh
 
 ## [Unveröffentlicht]
 
+## [0.4.2] – 2026-11-09
+
+### Behoben
+- **NUT-Server lauschte trotz Netzfreigabe nur auf 127.0.0.1 (Synology bekam keine Verbindung):** `nut-apply.sh` schrieb bei Netzfreigabe zwei Zeilen `LISTEN 127.0.0.1` und `LISTEN 0.0.0.0` in `upsd.conf`. Beide kollidieren auf Port 3493; der zweite Bind scheiterte, upsd lief nur lokal. Jetzt steht bei Netzfreigabe nur `LISTEN 0.0.0.0 3493` (deckt localhost mit ab), sonst nur `LISTEN 127.0.0.1 3493`. Das Update wendet die Konfiguration über `postroot.sh` automatisch neu an.
+
 ## [0.4.1] – 2026-11-09
 
 ### Hinzugefügt
