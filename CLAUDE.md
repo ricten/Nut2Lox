@@ -6,7 +6,7 @@ Ersetzt den ioBroker-Adapter `nut`. Liest NUT-Server (Port 3493) und veröffentl
 Übergeordnete Regeln (Topics, Status, Befehle, Versionierung): `../CLAUDE.md` und `../README.md`. Bei Widerspruch gelten die Regeln dieser Datei.
 
 ## Layout
-- `nut2lox/` = Inhalt des Plugin-ZIP (plugin.cfg, bin/, config/, cron/, daemon/, dpkg/, uninstall/, webfrontend/, *.sh)
+- `nut2lox/` = Inhalt des Plugin-ZIP (plugin.cfg, icons/ (nur die PNGs; kein `icon.svg`: sonst nimmt der Installer das SVG statt der Logos), bin/, config/, cron/, daemon/, dpkg/, sudoers/, uninstall/, webfrontend/, *.sh)
 - `../common/php/` = gemeinsamer Code (Util, Logger, MqttClient). `build.sh` kopiert ihn nach `bin/lib` des ZIP; nie aus einem anderen Plugin importieren
 - `tests/` = `php tests/run.php` (Unit + Ende-zu-Ende mit Fake-NUT/Fake-Broker), `bash tests/test_apply.sh` (Root-Skript im Testmodus) – **nicht** im ZIP
 
@@ -21,13 +21,19 @@ Ersetzt den ioBroker-Adapter `nut`. Liest NUT-Server (Port 3493) und veröffentl
 - Passwörter (NUT-Benutzer, Broker) nie loggen (Logger maskiert registrierte Secrets), nie per MQTT senden, nie im Klartext in der Oberfläche anzeigen.
 - Befehle: ab Werk gesperrt, nur die Positivliste `NutClient::CMD_ALLOWED` (beeper.*, test.battery.*, test.panel.*), Quittung unter `<topic>/quittung`, nie retained. Nie `shutdown.*`, `load.off` o. Ä. zulassen.
 - Ohne gültigen Wert wird nichts gesendet. Fällt eine Quelle aus: `verbunden`=0 und `status/ok`=0, `status/zaehler` läuft weiter.
-- **Lokaler NUT-Server:** einzige Ausnahme von „keine Änderungen außerhalb des Plugin-Ordners“. Nur über `bin/nut-apply.sh` (root, per sudo; die sudo-Erlaubnis für genau `apply` und `scan` legt `postroot.sh` als `/etc/sudoers.d/nut-plugin-<Ordner>` an, die Deinstallation entfernt sie), nur `/etc/nut/{nut.conf,ups.conf,upsd.conf,upsd.users}`, jeden Wert prüfen, fremde Dateien einmalig sichern (`*.vor-nut-plugin`), Betriebsart `netserver` (kein upsmon – der LoxBerry soll nicht von selbst herunterfahren). Synology-Modus: USV heißt zwingend `ups`, Benutzer `monuser`/`secret` mit Rolle slave (DSM-Vorgabe, nicht änderbar), Netzfreigabe erzwungen. Beim Abschalten nur die selbst angelegte Konfiguration anfassen.
+- **Lokaler NUT-Server:** einzige Ausnahme von „keine Änderungen außerhalb des Plugin-Ordners“. Nur über `bin/nut-apply.sh` (root, per sudo; die sudo-Erlaubnis für genau `apply` und `scan` steht in `sudoers/sudoers`; der LoxBerry-Installer legt sie als `system/sudoers/<Plugin-Name>` ab und entfernt sie bei der Deinstallation. Der Installer prüft die Datei nicht und ein Fehler sperrt sudo im ganzen System: `build.sh` prüft sie streng, `postroot.sh` prüft mit `visudo -cf` und löscht sie bei Fehler. Vor 0.8.0 legte `postroot.sh` `/etc/sudoers.d/nut-plugin-<Ordner>` an; diese Altdatei wird in `postroot.sh` und `uninstall` entfernt), nur `/etc/nut/{nut.conf,ups.conf,upsd.conf,upsd.users}`, jeden Wert prüfen, fremde Dateien einmalig sichern (`*.vor-nut-plugin`), Betriebsart `netserver` (kein upsmon – der LoxBerry soll nicht von selbst herunterfahren). Synology-Modus: USV heißt zwingend `ups`, Benutzer `monuser`/`secret` mit Rolle slave (DSM-Vorgabe, nicht änderbar), Netzfreigabe erzwungen. Beim Abschalten nur die selbst angelegte Konfiguration anfassen.
 
 ## Entwicklung
 - PHP lokal nötig für die Tests; fehlt es, das offen sagen und nichts als „getestet“ melden.
 - Nicht lokal testbar (nur auf dem LoxBerry): LoxBerry-Bibliotheken (`LBWeb`, `LBLog`, `mqtt_connectiondetails`), Weboberfläche, `sudo -n`, echte systemd-Dienste von NUT.
 - Dienst lokal: `NUT_DEV_DIR=<Ordner mit nut.json> NUT_DEV_MQTT=127.0.0.1:18830 php nut2lox/bin/nutd.php` (Fake-Server: `php tests/fake_nut.php 13493`, `php tests/fake_mqtt.php 18830 <Ordner>`).
 - Build: `bash build.sh` → `nut2lox-<version>.zip`.
+- **Release-Ablauf** (automatische Updates über `release.cfg`):
+  - **`release.cfg` nur nach Rücksprache mit Rico anlegen oder ändern** (auch `bash build.sh release-cfg` nicht ohne Freigabe): Sie löst bei allen Installationen mit aktivierten Auto-Updates sofort ein Update aus.
+  1. Version in `plugin.cfg` und `AppVersion.php` erhöhen, CHANGELOG ergänzen, Tests, `bash build.sh`.
+  2. Committen (ohne `release.cfg`), pushen, Tag `vX.Y.Z` setzen, `gh release create vX.Y.Z nut2lox-X.Y.Z.zip nut2lox.zip …` (beide ZIPs anhängen: `bash build.sh` erzeugt neben dem ZIP mit Version ein gleiches **ZIP ohne Version**, damit der Link `https://github.com/ricten/Nut2Lox/releases/latest/download/nut2lox.zip` immer das neueste Release liefert).
+  3. Danach `bash build.sh release-cfg` (schreibt `release.cfg` im Repo-Wurzelordner, nicht im ZIP), `release.cfg` committen und pushen. Erst dann sehen Installationen das Update. Die Datei darf nie auf eine Version zeigen, deren ZIP noch nicht existiert (LoxBerry lädt `ARCHIVEURL`).
+  - `plugin.cfg` enthält `AUTOMATIC_UPDATES=true` und `RELEASECFG=https://raw.githubusercontent.com/ricten/Nut2Lox/main/release.cfg` (`PRERELEASECFG` leer). Neue Installationen bekommen damit automatische Release-Updates; bereits installierte Plugins übernehmen `RELEASECFG` erst bei der ersten Neuinstallation von 0.8.0 (von Hand), danach laufen Updates automatisch.
 
 ## Vorgaben aus dem LoxBerry-Entwicklerwiki (Stand 2026-11-10)
 - `plugin.cfg`: `CUSTOM_LOGLEVELS=true` schaltet die Loglevel-Auswahl frei (der Installer liest nur diesen Schlüssel; `LOGLEVELS_ENABLED` gibt es nicht). Version dreiteilig ohne Buchstaben, `ARCHITECTURE` mit Werten immer in Anführungszeichen, `TITLE` höchstens 25 Zeichen.
@@ -35,5 +41,5 @@ Ersetzt den ioBroker-Adapter `nut`. Liest NUT-Server (Port 3493) und veröffentl
 - **UDP-Port** des Gateways nie fest eintragen: `mqtt_connectiondetails()['udpinport']` bzw. `general.json` (`Mqtt.Udpinport`), Standard 11884. Einfache Befehlsform `publish <topic> <wert>` (Leerzeichen im Topic nur in der JSON-Form). Das Gateway hat außerdem eine HTTP-Schnittstelle (`/admin/system/tools/mqtt.php`, mit LoxBerry-Anmeldung).
 - Ungenutzte Installationsskripte (`preinstall.sh` usw.) und eine leere `dpkg/apt` nicht mitliefern (verzögert die Installation).
 - Healthcheck: `bin/healthcheck` (Argumente `title` und `check`, Ausgabe als JSON mit `desc`, `status`, `result`, optional `logfile`; Status 3 Fehler = Benachrichtigung und E-Mail, 4 Warnung, 5 OK, 6 Info; schnell, nur lesend, nur das JSON ausgeben, Zeitzone setzen). Ein erwarteter Zustand (z. B. Fronius nachts abgeschaltet) ist nie Fehler oder Warnung.
-- Weboberfläche: Menüleiste über `$navbar` (vor `LBWeb::lbheader()` definieren), nicht über eigene Links; Tests rendern jeden Reiter mit Attrappen der LoxBerry-Bibliotheken (`tests/stubs`, `tests/ui_page.php`).
+- Weboberfläche: LoxBerry Design System (`LBWeb::lbheader(…, true)` = ohne jQuery Mobile, Inhalt in `<div class="lb-content">`, `lb-*`-Klassen, Farben nur über die Tokens `var(--lb-success,…)` usw., kein `data-role`); Menüleiste über `$navbar` (vor `LBWeb::lbheader()` definieren), nicht über eigene Links; Tests rendern jeden Reiter mit Attrappen der LoxBerry-Bibliotheken (`tests/stubs`, `tests/ui_page.php`).
 - Keine festen `/opt/loxberry`-Pfade (auch nicht in Kommentaren: der Installer warnt dann), Platzhalter `REPLACELBP…` oder Konstanten verwenden.

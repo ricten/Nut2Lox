@@ -379,6 +379,8 @@ foreach (['einstellungen', 'mqtt', 'loxone', 'test', 'logs'] as $tab) {
     check("UI $tab: genau ein aktiver Eintrag, und zwar dieser", array_values(array_filter($nav, fn($n) => !empty($n['active'])))[0]['URL'] ?? null, '?tab=' . $tab);
     check("UI $tab: nur ein aktiver Eintrag", count(array_filter($nav, fn($n) => !empty($n['active']))), 1);
     check("UI $tab: kein eigener Tab-Block mehr", str_contains($o, '-tabs"'), false);
+    check("UI $tab: Design System (lbheader mit nojqm, lb-content)", [str_contains($o, '<!--NOJQM:1-->'), str_contains($o, 'class="lb-content nut"')], [true, true]);
+    check("UI $tab: kein jQuery-Mobile-Rest (data-role, data-ajax, ui-btn)", (bool)preg_match('/data-role=|data-ajax=|ui-btn|data-theme=/', $o), false);
 }
 [$o] = $uiPage('mqtt', ['STUB_UDP' => '12345']);
 check('UI mqtt: Gateway V2, Abo fehlt, mit Anleitung', str_contains($o, 'Gateway V2: Das Abo „nut/#“ fehlt'), true);
@@ -405,6 +407,76 @@ check('UI loxone: UDP-Port aus der Konfiguration statt fest 11884', $um[1] ?? nu
 
 [$o] = $uiPage('logs');
 check('UI logs: zeigt die Logdatei', str_contains($o, 'Testzeile'), true);
+
+// ---------------------------------------------------------------- Auslieferung: sudoers/sudoers, Autoupdate, Icon, release.cfg
+$sudoers = (string)file_get_contents($root . '/nut2lox/sudoers/sudoers');
+$regeln = array_values(array_filter(explode("\n", $sudoers), fn($z) => trim($z) !== '' && $z[0] !== '#'));
+check('sudoers: genau eine Regel, nur nut-apply.sh apply und scan', $regeln, ['loxberry ALL=(root) NOPASSWD: REPLACELBPBINDIR/nut-apply.sh apply, REPLACELBPBINDIR/nut-apply.sh scan']);
+check('sudoers: endet mit Zeilenumbruch, nur LF, kein fester /opt/loxberry-Pfad', [str_ends_with($sudoers, "\n"), str_contains($sudoers, "\r"), str_contains($sudoers, '/opt/loxberry')], [true, false, false]);
+$postroot = (string)file_get_contents($root . '/nut2lox/postroot.sh');
+check('postroot: keine sudo-Erlaubnis mehr selbst anlegen, prueft die Installer-Datei mit visudo, raeumt die Altdatei weg',
+    [str_contains($postroot, 'NOPASSWD'), str_contains($postroot, 'visudo -cf "$SUDOERS"'), str_contains($postroot, '$5/system/sudoers/$2'), str_contains($postroot, 'rm -f "/etc/sudoers.d/nut-plugin-$3"')], [false, true, true, true]);
+check('uninstall: entfernt die Altdatei der Vorgaengerversionen', str_contains((string)file_get_contents($root . '/nut2lox/uninstall/uninstall'), 'rm -f "/etc/sudoers.d/nut-plugin-$FOLDER"'), true);
+$pcfg = (string)file_get_contents($root . '/nut2lox/plugin.cfg');
+check('plugin.cfg: Autoupdate an, RELEASECFG auf raw.githubusercontent.com (main), PRERELEASECFG leer',
+    [str_contains($pcfg, "\nAUTOMATIC_UPDATES=true\n"), str_contains($pcfg, "\nRELEASECFG=https://raw.githubusercontent.com/ricten/Nut2Lox/main/release.cfg\n"), str_contains($pcfg, "\nPRERELEASECFG=\n")], [true, true, true]);
+check('Altes sudo-Anlegen im Quelltext nicht mehr vorhanden', str_contains((string)file_get_contents($root . '/nut2lox/postroot.sh'), 'install -m 0440'), false);
+
+// build.sh release-cfg in einer Kopie des Repos (sonst entstuende eine echte release.cfg im Repo)
+$bashOk = false;
+$pr = @proc_open(['bash', '-c', 'command -v python3 >/dev/null 2>&1 || command -v python >/dev/null 2>&1'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pp);
+if (is_resource($pr)) {
+    stream_get_contents($pp[1]);
+    stream_get_contents($pp[2]);
+    $bashOk = proc_close($pr) === 0;
+}
+if ($bashOk) {
+    $rc = $dir . '/rc';
+    $copy = function (string $from, string $to) use (&$copy): void {
+        @mkdir($to, 0777, true);
+        foreach (scandir($from) as $f) {
+            if ($f === '.' || $f === '..') {
+                continue;
+            }
+            is_dir("$from/$f") ? $copy("$from/$f", "$to/$f") : copy("$from/$f", "$to/$f");
+        }
+    };
+    @mkdir("$rc/nut", 0777, true);
+    copy($root . '/build.sh', "$rc/nut/build.sh");
+    copy($root . '/CHANGELOG.md', "$rc/nut/CHANGELOG.md");
+    $copy($root . '/nut2lox', "$rc/nut/nut2lox");
+    $copy(dirname($root) . '/common', "$rc/common");
+    $ver = AppVersion::CURRENT;
+    $bs = function (string $arg = '') use ($rc): string {
+        $cmd = $arg !== '' ? ['bash', 'build.sh', $arg] : ['bash', 'build.sh'];
+        $p = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, "$rc/nut");
+        $o = stream_get_contents($pipes[1]) . stream_get_contents($pipes[2]);
+        proc_close($p);
+        return $o;
+    };
+    $bs();
+    check('build.sh: baut das ZIP, ohne release.cfg zu schreiben', [file_exists("$rc/nut/nut2lox-$ver.zip"), file_exists("$rc/nut/release.cfg")], [true, false]);
+    $bs('release-cfg');
+    $cfgtxt = (string)@file_get_contents("$rc/nut/release.cfg");
+    check('build.sh release-cfg: Version, ZIP-Link des Release-Anhangs, Info-Link, LF', [str_contains($cfgtxt, "[AUTOUPDATE]\n"), str_contains($cfgtxt, "\nVERSION=$ver\n"),
+        str_contains($cfgtxt, "\nARCHIVEURL=https://github.com/ricten/Nut2Lox/releases/download/v$ver/nut2lox-$ver.zip\n"), str_contains($cfgtxt, "\nINFOURL=https://github.com/ricten/Nut2Lox/releases/tag/v$ver\n"), str_contains($cfgtxt, "\r")], [true, true, true, true, false]);
+    // ZIP-Inhalt mit Python lesen (die PHP-Erweiterung zip ist nicht ueberall da)
+    $zp = proc_open(['bash', '-c', 'P=$(command -v python3 || command -v python); "$P" -c "import sys,zipfile;z=zipfile.ZipFile(sys.argv[1]);print(chr(10).join(z.namelist()));print(chr(0));sys.stdout.write(z.read(sys.argv[2]).decode())" "$1" sudoers/sudoers', 'x', "$rc/nut/nut2lox-$ver.zip"],
+        [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $zpp);
+    $zout = str_replace("\r\n", "\n", stream_get_contents($zpp[1]));
+    stream_get_contents($zpp[2]);
+    proc_close($zp);
+    [$zl, $zs] = array_pad(explode("\n\0\n", $zout, 2), 2, '');
+    $namen = explode("\n", $zl);
+    check('ZIP: sudoers/sudoers, PNG-Icons, plugin.cfg zuerst, keine release.cfg, kein icon.svg', [in_array('sudoers/sudoers', $namen, true), in_array('icons/icon_64.png', $namen, true), $namen[0] ?? '', in_array('release.cfg', $namen, true), in_array('icons/icon.svg', $namen, true)], [true, true, 'plugin.cfg', false, false]);
+    check('ZIP: sudoers/sudoers unveraendert', $zs, $sudoers);
+    file_put_contents("$rc/nut/release.cfg", str_replace("VERSION=$ver", 'VERSION=0.0.1', $cfgtxt));
+    check('build.sh: abweichende release.cfg nur als Hinweis (kein Fehler)', str_contains($bs(), 'Hinweis: release.cfg zeigt auf 0.0.1'), true);
+    file_put_contents("$rc/nut/nut2lox/sudoers/sudoers", $sudoers . "loxberry ALL=(ALL) NOPASSWD: ALL\n");
+    check('build.sh: sudoers mit zusaetzlicher Regel bricht ab', str_contains($bs(), 'enthaelt unerlaubte Zeilen'), true);
+} else {
+    echo "Hinweis: bash/python fehlen, build.sh-Tests uebersprungen\n";
+}
 
 echo "\n$count Pruefungen, $fails Fehler\n";
 exit($fails ? 1 : 0);

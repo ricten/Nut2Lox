@@ -1,0 +1,4 @@
+# sudoers/sudoers - vom LoxBerry-Installer als root nach system/sudoers/<Plugin-Name> kopiert (ohne Syntaxpruefung!).
+# Die Weboberflaeche darf den lokalen NUT-Server einrichten: genau diese zwei Aufrufe, nichts anderes.
+# REPLACELBPBINDIR ersetzt der Installer durch den bin-Ordner dieses Plugins.
+loxberry ALL=(root) NOPASSWD: REPLACELBPBINDIR/nut-apply.sh apply, REPLACELBPBINDIR/nut-apply.sh scan

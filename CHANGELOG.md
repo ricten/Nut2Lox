@@ -8,6 +8,17 @@ Release-Ablauf: Version in `nut2lox/plugin.cfg` und `nut2lox/bin/lib/AppVersion.
 
 ## [Unveröffentlicht]
 
+## [0.8.0] – 2026-11-10
+
+### Neu
+- **ZIP ohne Version im Namen** (`<name>.zip`) an jedem Release: `…/releases/latest/download/<name>.zip` zeigt immer auf das neueste Release (`bash build.sh` erzeugt beide ZIPs).
+- **Automatische Updates:** `plugin.cfg` verweist mit `RELEASECFG` auf die `release.cfg` im GitHub-Repository (`AUTOMATIC_UPDATES=true`: neue Installationen bekommen Release-Updates automatisch, in der Plugin-Verwaltung änderbar). `bash build.sh release-cfg` schreibt die Datei erst nach dem GitHub-Release. Schon installierte Plugins bekommen den Schlüssel erst durch die einmalige Neuinstallation von 0.8.0.
+- **`sudoers/sudoers`:** Die sudo-Erlaubnis für genau `nut-apply.sh apply` und `scan` legt jetzt der LoxBerry-Installer an (Vorgabe der Plugin-Entwicklung) statt `postroot.sh`. `build.sh` prüft die Datei streng (der Installer prüft sie nicht, ein Fehler würde sudo im ganzen System sperren), `postroot.sh` prüft sie zusätzlich mit `visudo -cf` und löscht sie bei einem Fehler. Die Datei der Vorgängerversionen (`/etc/sudoers.d/nut-plugin-<Ordner>`) wird entfernt.
+
+### Geändert
+- **Weboberfläche im LoxBerry Design System** (`lb-*`-Klassen, `lbheader(…, true)`) statt jQuery Mobile; Farben folgen dem gewählten Theme (auch dunkel). Felder, Funktionen und Topics sind unverändert.
+- Doku: Seitenlinks in `docs/wiki/` funktionieren im Repository (mit `.md`), Abschnitt „Automatische Updates“ in `Installation.md` und `README.md`.
+
 ## [0.7.4] – 2026-11-10
 
 Abgleich mit dem LoxBerry-Entwicklerwiki und dem LoxBerry-Quellcode.

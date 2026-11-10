@@ -6,6 +6,7 @@
 nut2lox/                    Inhalt des Plugin-ZIP
 ├── plugin.cfg
 ├── postinstall.sh preupgrade.sh postupgrade.sh postroot.sh
+├── sudoers/sudoers          (sudo-Erlaubnis für nut-apply.sh apply|scan)
 ├── uninstall/uninstall  daemon/daemon  cron/cron.01min
 ├── dpkg/apt12 apt          Pakete (nut-server, nut-client, usbutils)
 ├── bin/

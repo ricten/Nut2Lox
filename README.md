@@ -1,7 +1,7 @@
 # Nut2Lox – LoxBerry-Plugin
 <img src="docs/logo/logo_loxberry.png" alt="Nut2Lox Logo" width="128">
 
-**Version 0.7.4** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
+**Version 0.8.0** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
 
 Dokumentation: [docs/wiki/Home.md](docs/wiki/Home.md)
 
@@ -18,6 +18,8 @@ Optional richtet das Plugin auf dem LoxBerry selbst einen NUT-Server für eine U
 
 Umstieg vom früheren Plugin `nut` (bis 0.4.4): `nut2lox` zuerst installieren (übernimmt die Einstellungen), dann das alte Plugin deinstallieren. Die Topics bleiben gleich.
 
+**Immer das neueste Release:** `https://github.com/ricten/Nut2Lox/releases/latest/download/nut2lox.zip` (ZIP ohne Version im Namen). **Automatische Updates:** Neue Installationen stehen in der Plugin-Verwaltung auf „Releases“, LoxBerry prüft täglich die `release.cfg` im Repository und installiert neuere Versionen selbst (Details: [docs/wiki/Installation.md](docs/wiki/Installation.md)).
+
 ## Topics (Auszug)
 `nut/<name>/battery_charge`, `…/battery_runtime`, `…/ups_status`, `…/zustand/online|batterie|batterie_schwach|…` (0/1), `…/verbunden`, `…/info/*`, `nut/status/ok|zaehler|ts`.
 Befehle (gesperrt bis zur Freigabe): `nut/befehl/<name>/beeper_toggle` = 1, Quittung unter `…/quittung`. Vollständige Liste: [docs/wiki/MQTT-Topics.md](docs/wiki/MQTT-Topics.md).
@@ -26,7 +28,7 @@ Befehle (gesperrt bis zur Freigabe): `nut/befehl/<name>/beeper_toggle` = 1, Quit
 Standard ist der Broker des LoxBerry (Zugangsdaten verwaltet LoxBerry). Alternativ lässt sich im Reiter „MQTT“ ein eigener Broker (Host, Port, Benutzer, Passwort) eintragen.
 
 ## Lokaler NUT-Server
-`bin/nut-apply.sh` (root, per sudo – die Erlaubnis legt die Installation unter `/etc/sudoers.d/` an) schreibt `/etc/nut/{nut.conf,ups.conf,upsd.conf,upsd.users}`. Betriebsart `netserver` ohne upsmon: der LoxBerry fährt bei leerer Batterie **nicht** selbst herunter.
+`bin/nut-apply.sh` (root, per sudo – die Erlaubnis kommt aus `sudoers/sudoers` des Plugins und wird vom LoxBerry-Installer unter `system/sudoers/` abgelegt) schreibt `/etc/nut/{nut.conf,ups.conf,upsd.conf,upsd.users}`. Betriebsart `netserver` ohne upsmon: der LoxBerry fährt bei leerer Batterie **nicht** selbst herunter.
 Fremde Dateien werden einmalig als `*.vor-nut-plugin` gesichert. Deinstallation lässt `/etc/nut` und die Pakete bestehen. Details: [docs/wiki/Lokaler-NUT-Server.md](docs/wiki/Lokaler-NUT-Server.md).
 
 ### Synology als Client

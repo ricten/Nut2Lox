@@ -8,6 +8,8 @@ bash build.sh
 
 Ergebnis: `nut2lox-<version>.zip` (enthält nur den Inhalt von `nut2lox/` plus die gemeinsamen Klassen, keine Tests und keine Doku). Fertige ZIPs gibt es unter [Releases](https://github.com/ricten/Nut2Lox/releases).
 
+**Immer das neueste Release:** Der Link `https://github.com/ricten/Nut2Lox/releases/latest/download/nut2lox.zip` lädt das ZIP des jeweils letzten Releases (ohne Version im Dateinamen). Er lässt sich in der LoxBerry-Plugin-Verwaltung beim Installieren von einer Internetadresse eintragen und muss nach einem neuen Release nicht angepasst werden.
+
 ## Auf dem LoxBerry installieren
 
 1. LoxBerry-Oberfläche → **Plugin-Verwaltung** → **Plugin installieren**.
@@ -27,7 +29,7 @@ Ergebnis: `nut2lox-<version>.zip` (enthält nur den Inhalt von `nut2lox/` plus d
 | Live-Status (RAM) | `/dev/shm/nut2lox/status.json` |
 | Autostart | Daemon beim Boot (root → startet als `loxberry`) |
 | Watchdog | Cronjob jede Minute startet den Dienst, falls er nicht läuft |
-| sudo-Erlaubnis | `/etc/sudoers.d/nut-plugin-nut2lox` (nur `nut-apply.sh apply` und `nut-apply.sh scan`) |
+| sudo-Erlaubnis | `system/sudoers/nut2lox` im LoxBerry, aus `sudoers/sudoers` des Plugins (nur `nut-apply.sh apply` und `nut-apply.sh scan`) |
 | Pakete | `nut-server`, `nut-client`, `usbutils` |
 
 Die sudo-Erlaubnis und `/etc/nut` sind die einzigen Stellen außerhalb des Plugin-Ordners. Wozu, steht unter [Lokaler NUT-Server](Lokaler-NUT-Server.md).
@@ -35,6 +37,15 @@ Die sudo-Erlaubnis und `/etc/nut` sind die einzigen Stellen außerhalb des Plugi
 ## Update
 
 Beim Update sichern `preupgrade.sh`/`postupgrade.sh` **Konfiguration und Daten** und spielen sie zurück. Neue Konfigurationsschlüssel ergänzt der Dienst beim Laden automatisch mit Standardwerten. Die Installation läuft auch beim Update als root und schreibt die Konfiguration des lokalen NUT-Servers neu.
+
+### Automatische Updates
+
+Ab Version 0.8.0 nutzt Nut2Lox die Update-Funktion der LoxBerry-Plugin-Verwaltung. In der `plugin.cfg` steht der Verweis auf die Datei `release.cfg` im GitHub-Repository (`ricten/Nut2Lox`, Zweig `main`). LoxBerry prüft sie täglich und vergleicht die dort eingetragene Version mit der installierten.
+
+- **Neue Installationen** stehen in der Plugin-Verwaltung bei „Automatische Updates“ auf **Releases**: eine neuere Version wird selbst heruntergeladen und installiert.
+- **Schon installierte Plugins** bekommen den Verweis erst, wenn einmal von Hand (ZIP oder Link) mindestens Version 0.8.0 installiert wurde. Danach lässt sich die Einstellung in der Plugin-Verwaltung ändern: *Aus*, *Benachrichtigen* oder *Releases*.
+- Konfiguration und Daten bleiben wie bei jedem Update erhalten (siehe oben).
+- Die `release.cfg` zeigt immer auf das ZIP der jeweils letzten Version; sie wird erst nach dem GitHub-Release angepasst, damit nie auf ein fehlendes ZIP verwiesen wird.
 
 ## Umstieg vom früheren Plugin „nut“
 

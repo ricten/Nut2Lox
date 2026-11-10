@@ -34,7 +34,7 @@ Hängt die USV per USB am LoxBerry, richtet das Plugin auf Wunsch einen NUT-Serv
 - Bestehende Dateien werden einmalig als `*.vor-nut-plugin` gesichert und danach nicht mehr überschrieben.
 - Jeder Wert wird vor dem Schreiben geprüft (Name, Treiberliste, IDs, Benutzer, Passwort).
 - Ist die Option aus, wird **nur eine vom Plugin angelegte** Konfiguration abgeschaltet (`MODE=none`); fremde Konfiguration bleibt unberührt.
-- Die sudo-Erlaubnis legt die Installation an (`/etc/sudoers.d/nut-plugin-nut2lox`, vorher mit `visudo -c` geprüft) und entfernt die Deinstallation.
+- Die sudo-Erlaubnis kommt aus `sudoers/sudoers` des Plugins: der LoxBerry-Installer legt sie als `system/sudoers/nut2lox` ab und entfernt sie bei der Deinstallation; `postroot.sh` prüft sie mit `visudo -c` und löscht sie bei einem Fehler. Vor 0.8.0 lag sie unter `/etc/sudoers.d/nut-plugin-nut2lox` (wird beim Aktualisieren entfernt).
 
 ## Synology DiskStation als Client
 
