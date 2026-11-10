@@ -1,6 +1,6 @@
 # MQTT-Topics
 
-Schema: `nut/<name>/<wert>`. `<name>` ist der Gerätename (siehe [Konfiguration](Konfiguration)), im Beispiel `usv`. Werte sind reine Zahlen mit Punkt (ohne Einheit), Zustände 0/1, Text nur wo es Text ist.
+Schema: `nut/<name>/<wert>`. `<name>` ist der Gerätename (siehe [Konfiguration](Konfiguration.md)), im Beispiel `usv`. Werte sind reine Zahlen mit Punkt (ohne Einheit), Zustände 0/1, Text nur wo es Text ist.
 Ein Wert ohne gültigen Inhalt wird **nicht** gesendet. Alle Topics werden **nicht retained** veröffentlicht (Ausnahme: die Letzter-Wille-Nachricht von `nut/status/ok`).
 
 ## Messwerte (nut/&lt;name&gt;/…)
@@ -68,7 +68,7 @@ Bricht der Dienst ab, setzt der Broker `nut/status/ok` per Letzter-Wille-Nachric
 
 ## Befehle
 
-Siehe [Loxone-Anbindung](Loxone-Anbindung#befehle-aus-loxone).
+Siehe [Loxone-Anbindung](Loxone-Anbindung.md#befehle-aus-loxone).
 
 | Topic | Wirkung |
 |---|---|

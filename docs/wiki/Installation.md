@@ -13,7 +13,7 @@ Ergebnis: `nut2lox-<version>.zip` (enthält nur den Inhalt von `nut2lox/` plus d
 1. LoxBerry-Oberfläche → **Plugin-Verwaltung** → **Plugin installieren**.
 2. ZIP hochladen und installieren. Die Installation holt die Pakete `nut-server`, `nut-client` und `usbutils`, richtet die sudo-Erlaubnis ein und startet den Dienst.
 3. Plugin **Nut2Lox** öffnen.
-4. NUT-Server eintragen (siehe [Konfiguration](Konfiguration)), **Aktiv** anhaken, **Speichern**.
+4. NUT-Server eintragen (siehe [Konfiguration](Konfiguration.md)), **Aktiv** anhaken, **Speichern**.
 5. Nach spätestens einem Abfrageintervall (Standard 10 s) erscheinen Werte unter `nut/<name>/*` (im LoxBerry-MQTT-Finder prüfbar).
 
 ## Was die Installation einrichtet
@@ -30,7 +30,7 @@ Ergebnis: `nut2lox-<version>.zip` (enthält nur den Inhalt von `nut2lox/` plus d
 | sudo-Erlaubnis | `/etc/sudoers.d/nut-plugin-nut2lox` (nur `nut-apply.sh apply` und `nut-apply.sh scan`) |
 | Pakete | `nut-server`, `nut-client`, `usbutils` |
 
-Die sudo-Erlaubnis und `/etc/nut` sind die einzigen Stellen außerhalb des Plugin-Ordners. Wozu, steht unter [Lokaler NUT-Server](Lokaler-NUT-Server).
+Die sudo-Erlaubnis und `/etc/nut` sind die einzigen Stellen außerhalb des Plugin-Ordners. Wozu, steht unter [Lokaler NUT-Server](Lokaler-NUT-Server.md).
 
 ## Update
 

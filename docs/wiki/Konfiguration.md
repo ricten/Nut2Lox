@@ -28,7 +28,7 @@ Hat ein Server ohne festen USV-Namen **mehrere** USVs, heißen die Geräte `<nam
 
 ### USV per USB am LoxBerry
 
-Siehe [Lokaler NUT-Server](Lokaler-NUT-Server).
+Siehe [Lokaler NUT-Server](Lokaler-NUT-Server.md).
 
 ## MQTT
 
@@ -50,7 +50,7 @@ Eine Änderung wirkt ohne Neustart: der Dienst trennt und verbindet neu. Die Sel
 
 ## Einbindung in Loxone
 
-Tabelle aller Topics mit Eingangsname, Einheit, Bedeutung und retained-Angabe, dazu die Befehle. Siehe auch [Loxone-Anbindung](Loxone-Anbindung).
+Tabelle aller Topics mit Eingangsname, Einheit, Bedeutung und retained-Angabe, dazu die Befehle. Siehe auch [Loxone-Anbindung](Loxone-Anbindung.md).
 
 ## Test
 

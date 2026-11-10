@@ -18,13 +18,13 @@
 
 ## Seiten
 
-1. [Installation](Installation)
-2. [Konfiguration](Konfiguration)
-3. [Lokaler NUT-Server](Lokaler-NUT-Server) (USB-USV am LoxBerry, Synology)
-4. [MQTT-Topics](MQTT-Topics)
-5. [Loxone-Anbindung](Loxone-Anbindung)
-6. [Fehlersuche](Fehlersuche)
-7. [Entwicklung](Entwicklung)
+1. [Installation](Installation.md)
+2. [Konfiguration](Konfiguration.md)
+3. [Lokaler NUT-Server](Lokaler-NUT-Server.md) (USB-USV am LoxBerry, Synology)
+4. [MQTT-Topics](MQTT-Topics.md)
+5. [Loxone-Anbindung](Loxone-Anbindung.md)
+6. [Fehlersuche](Fehlersuche.md)
+7. [Entwicklung](Entwicklung.md)
 
 ## Voraussetzungen
 
