@@ -5,11 +5,12 @@
 ```
 nut2lox/                    Inhalt des Plugin-ZIP
 ├── plugin.cfg
-├── preinstall.sh postinstall.sh preupgrade.sh postupgrade.sh postroot.sh
+├── postinstall.sh preupgrade.sh postupgrade.sh postroot.sh
 ├── uninstall/uninstall  daemon/daemon  cron/cron.01min
 ├── dpkg/apt12 apt          Pakete (nut-server, nut-client, usbutils)
 ├── bin/
 │   ├── nutd.php            Dienst (Abfrage, MQTT, Befehle)
+│   ├── healthcheck         LoxBerry-Healthcheck (Dienst, Broker, Quelle)
 │   ├── start.sh stop.sh
 │   ├── nut-apply.sh        lokaler NUT-Server (root, per sudo)
 │   └── lib/                 NutClient, NutConfig, bootstrap, AppVersion
@@ -30,6 +31,8 @@ Der gemeinsame Code liegt außerhalb des Repos in `loxberry-plugins/common/php/`
 php tests/run.php        # Unit + Ende-zu-Ende (Dienst gegen Fake-NUT und Fake-Broker)
 bash tests/test_apply.sh # nut-apply.sh im Testmodus (schreibt nur in ein Temp-Verzeichnis)
 ```
+
+`tests/run.php` prüft zusätzlich den **Healthcheck** (`bin/healthcheck`, alle Zustände) und rendert **jeden Reiter der Weboberfläche** mit Attrappen der LoxBerry-Bibliotheken (`tests/stubs/`, `tests/ui_page.php`): Das findet Laufzeitfehler, prüft Menüleiste, Gateway-Abo und UDP-Port. Das echte Aussehen in LoxBerry (Design, jQuery Mobile) lässt sich so nicht prüfen. Der gemeinsame Code `GatewayInfo` hat eigene Tests: `php ../common/tests/run.php`.
 
 `tests/run.php` startet `tests/fake_nut.php` und `tests/fake_mqtt.php` selbst. Geprüft werden NUT-Client (Variablen, Zusatzinfos, Befehle, Anmeldung), MQTT-Client (Abos, Letzter Wille), Konfiguration, Logger-Maskierung und der komplette Dienst: Werte, Zustände, Lebenszeichen, Ausfall, Befehle samt Quittungen, Sperre, mehrere USVs, eigener Broker.
 

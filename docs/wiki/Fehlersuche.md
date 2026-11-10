@@ -10,7 +10,7 @@ Zuerst: Plugin öffnen → **Test → Selbstprüfung** (Konfiguration, NUT-Serve
 | Sofort abrufen zeigt Werte, aber nichts in MQTT | Server nicht auf **Aktiv**, oder Dienst läuft nicht (Reiter MQTT) |
 | Dienst „läuft nicht“ | Der Watchdog startet ihn jede Minute. Bleibt er aus: `php -v` (≥ 8.4), `start-error.log` im Log-Ordner ansehen |
 | Broker-Verbindung „getrennt“ | MQTT-Broker auf dem LoxBerry aktiv? Mit eigenem Broker Host/Port/Zugang prüfen (Selbstprüfung → Broker) |
-| Keine Werte in Loxone | MQTT-Gateway-Abonnement `nut/#` prüfen, Eingangsnamen (`nut_<name>_…`), bei eigenem Broker: abonniert das Gateway ihn? |
+| Keine Werte in Loxone | **Gateway V2:** Das Abo `nut/#` muss von Hand im MQTT Gateway unter „Abonnements“ stehen (V2 liest die Abo-Datei des Plugins nicht); der Reiter MQTT zeigt, ob es eingetragen ist. Außerdem Eingangsnamen (`nut_<name>_…`) und bei eigenem Broker: abonniert das Gateway ihn? |
 | Aktiv-Spalte leer (Kästchen fehlen) | Bis 0.3.0 blendete die Oberfläche sie aus; ab 0.3.1 sichtbar |
 | „sudo: a password is required“ beim Einrichten des lokalen Servers | Die sudo-Erlaubnis fehlt. Sie legt die Installation unter `/etc/sudoers.d/nut-plugin-nut2lox` an: Plugin neu installieren bzw. aktualisieren, dann `ls -l /etc/sudoers.d/nut-plugin-*` prüfen |
 | Lokaler Server: Kästchen bleibt rot | Treiber braucht einige Sekunden; `sudo journalctl -u nut-server -u 'nut-driver@*' --no-pager \| tail -30`; USV mit **USB-Geräte suchen** prüfen, Treiber/IDs setzen |
@@ -20,7 +20,7 @@ Zuerst: Plugin öffnen → **Test → Selbstprüfung** (Konfiguration, NUT-Serve
 | Befehl: `abgelehnt: Befehle sind gesperrt` | Freigabe unter „Einstellungen USV/NUT“ fehlt |
 | Befehl: `abgelehnt: NUT: ACCESS-DENIED` / „Anmeldung fehlgeschlagen“ | Benutzer/Passwort beim Server prüfen (Selbstprüfung → Anmeldung) |
 | Befehl: `abgelehnt: NUT: CMD-NOT-SUPPORTED` | Die USV kennt den Befehl nicht (siehe `info/befehle`) |
-| Loglevel nicht einstellbar | Ab 0.4.4 in der Plugin-Verwaltung verfügbar |
+| Loglevel nicht einstellbar | Ab 0.7.4 in der Plugin-Verwaltung verfügbar (`CUSTOM_LOGLEVELS=true`); nach dem Update die Plugin-Verwaltung neu laden. Frühere Versionen setzten den falschen Schlüssel |
 | Gerät heißt `<name>_<usv>` statt `<name>` | Der Server hat mehrere USVs und der USV-Name ist leer. USV-Namen eintragen, wenn nur eine gemeint ist |
 
 ## MQTT direkt prüfen

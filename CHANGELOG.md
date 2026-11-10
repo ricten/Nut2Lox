@@ -8,6 +8,26 @@ Release-Ablauf: Version in `nut2lox/plugin.cfg` und `nut2lox/bin/lib/AppVersion.
 
 ## [Unveröffentlicht]
 
+## [0.7.4] – 2026-11-10
+
+Abgleich mit dem LoxBerry-Entwicklerwiki und dem LoxBerry-Quellcode.
+
+### Behoben
+- **Loglevel in der Plugin-Verwaltung:** Die Auswahl steuert in `plugin.cfg` der Schlüssel `CUSTOM_LOGLEVELS` (der Installer liest `LOGLEVELS_ENABLED` nicht). Er steht jetzt auf `true`, der überflüssige Schlüssel ist entfernt. Bei einer Aktualisierung erscheint die Auswahl, Standard ist Stufe 3.
+- **Abo-Datei `mqtt_subscriptions.cfg`:** Das Gateway liest sie zeilenweise (ein Topic je Zeile), nicht als INI-Datei. Sie enthält jetzt nur `nut/#`. Vorher meldete das Gateway V1 die Zeilen `[nut]`, `TOPIC=…` und `NAME=…` als Abos an und `nut/#` selbst nicht.
+- **Gateway-Abo wird jetzt wirklich geprüft** (Reiter MQTT und Selbstprüfung). Das Gateway V2 liest die Abo-Datei von Plugins nicht (laut LoxBerry-Quellcode): Dort muss `nut/#` im MQTT Gateway unter „Abonnements“ von Hand eingetragen werden. Die Prüfung liest die Abo-Liste des Gateways und erklärt, was fehlt. Vorher zeigte die Prüfung „hinterlegt“, sobald die Datei existierte.
+- **UDP-Port des Gateways** wird aus den MQTT-Verbindungsdaten gelesen (`udpinport`) statt fest 11884 anzunehmen; Oberfläche, Anleitung für Loxone Config und Test der Befehlsbrücke zeigen den echten Port.
+
+### Neu
+- **Healthcheck** (`bin/healthcheck`): Die LoxBerry-Healthcheck-Seite zeigt den Zustand des Plugins (Dienst, MQTT-Broker, Quelle). Ein toter Dienst ist ein Fehler und löst die tägliche Benachrichtigung samt E-Mail aus; Ausfälle der Quelle sind eine Warnung; nicht eingerichtet ist eine Info.
+- **Menüleiste** der LoxBerry-Oberfläche (`$navbar`) statt eigener Reiter.
+- Neuer gemeinsamer Code `GatewayInfo` (Gateway-Version, UDP-Port, Abo-Prüfung) in `common/php`.
+
+### Geändert
+- **Gateway-Abo im Reiter MQTT als farbiges Feld:** grün, sobald mindestens ein passendes Abo im Gateway eingetragen ist (auch wenn nur ein Teil der Topics abonniert ist; dann mit Hinweis), rot nur, wenn keines eingetragen ist. Die eingetragenen Abos werden darunter aufgelistet.
+- Leeres `preinstall.sh` entfernt (die Doku rät, ungenutzte Installationsskripte nicht mitzuliefern).
+- `plugin.cfg`: `WEBSITE` verweist auf das GitHub-Repository (Link in der Plugin-Verwaltung).
+
 ## [0.7.3] – 2026-11-09
 
 ### Geändert

@@ -28,3 +28,12 @@ Ersetzt den ioBroker-Adapter `nut`. Liest NUT-Server (Port 3493) und veröffentl
 - Nicht lokal testbar (nur auf dem LoxBerry): LoxBerry-Bibliotheken (`LBWeb`, `LBLog`, `mqtt_connectiondetails`), Weboberfläche, `sudo -n`, echte systemd-Dienste von NUT.
 - Dienst lokal: `NUT_DEV_DIR=<Ordner mit nut.json> NUT_DEV_MQTT=127.0.0.1:18830 php nut2lox/bin/nutd.php` (Fake-Server: `php tests/fake_nut.php 13493`, `php tests/fake_mqtt.php 18830 <Ordner>`).
 - Build: `bash build.sh` → `nut2lox-<version>.zip`.
+
+## Vorgaben aus dem LoxBerry-Entwicklerwiki (Stand 2026-11-10)
+- `plugin.cfg`: `CUSTOM_LOGLEVELS=true` schaltet die Loglevel-Auswahl frei (der Installer liest nur diesen Schlüssel; `LOGLEVELS_ENABLED` gibt es nicht). Version dreiteilig ohne Buchstaben, `ARCHITECTURE` mit Werten immer in Anführungszeichen, `TITLE` höchstens 25 Zeichen.
+- **Gateway-Abo:** `config/mqtt_subscriptions.cfg` ist **zeilenweise** (ein Topic je Zeile, z. B. `nut/#`), kein INI-Format. Nur das Gateway V1 (Perl) liest sie; das **Gateway V2 (Python) liest sie nicht** (LoxBerry-Quellcode `sbin/mqtt_gateway.py`). Die Oberfläche prüft deshalb `config/system/subscriptions.json` (`GatewayInfo::subscription`) und sagt dem Benutzer, dass er das Abo im Gateway eintragen muss. Nie behaupten, das Plugin trage das Abo selbst ein.
+- **UDP-Port** des Gateways nie fest eintragen: `mqtt_connectiondetails()['udpinport']` bzw. `general.json` (`Mqtt.Udpinport`), Standard 11884. Einfache Befehlsform `publish <topic> <wert>` (Leerzeichen im Topic nur in der JSON-Form). Das Gateway hat außerdem eine HTTP-Schnittstelle (`/admin/system/tools/mqtt.php`, mit LoxBerry-Anmeldung).
+- Ungenutzte Installationsskripte (`preinstall.sh` usw.) und eine leere `dpkg/apt` nicht mitliefern (verzögert die Installation).
+- Healthcheck: `bin/healthcheck` (Argumente `title` und `check`, Ausgabe als JSON mit `desc`, `status`, `result`, optional `logfile`; Status 3 Fehler = Benachrichtigung und E-Mail, 4 Warnung, 5 OK, 6 Info; schnell, nur lesend, nur das JSON ausgeben, Zeitzone setzen). Ein erwarteter Zustand (z. B. Fronius nachts abgeschaltet) ist nie Fehler oder Warnung.
+- Weboberfläche: Menüleiste über `$navbar` (vor `LBWeb::lbheader()` definieren), nicht über eigene Links; Tests rendern jeden Reiter mit Attrappen der LoxBerry-Bibliotheken (`tests/stubs`, `tests/ui_page.php`).
+- Keine festen `/opt/loxberry`-Pfade (auch nicht in Kommentaren: der Installer warnt dann), Platzhalter `REPLACELBP…` oder Konstanten verwenden.

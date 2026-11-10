@@ -11,7 +11,7 @@ if ! grep -q "^## \[$VER\]" CHANGELOG.md; then
     echo "CHANGELOG.md hat keinen Eintrag fuer Version $VER" >&2
     exit 1
 fi
-for c in Util Logger MqttClient; do
+for c in Util Logger MqttClient GatewayInfo; do
     [ -f "../common/php/$c.php" ] || { echo "../common/php/$c.php fehlt" >&2; exit 1; }
 done
 PY="$(command -v python3 || command -v python)" || { echo "python noetig (ersetzt zip)" >&2; exit 1; }
@@ -21,7 +21,7 @@ STAGE="$PWD/build/stage"
 rm -rf build
 mkdir -p "$STAGE"
 cp -r nut2lox/. "$STAGE/"
-cp ../common/php/Util.php ../common/php/Logger.php ../common/php/MqttClient.php "$STAGE/bin/lib/"
+cp ../common/php/Util.php ../common/php/Logger.php ../common/php/MqttClient.php ../common/php/GatewayInfo.php "$STAGE/bin/lib/"
 
 # PHP-Syntaxpruefung, sofern php vorhanden
 if command -v php >/dev/null 2>&1; then
@@ -30,6 +30,10 @@ if command -v php >/dev/null 2>&1; then
     done < <(find "$STAGE" -name '*.php')
 else
     echo "Hinweis: php nicht gefunden, Syntaxpruefung uebersprungen" >&2
+fi
+# Healthcheck (PHP-Skript ohne Endung)
+if command -v php >/dev/null 2>&1 && [ -f "$STAGE/bin/healthcheck" ]; then
+    php -l "$STAGE/bin/healthcheck" >/dev/null || { echo "Syntaxfehler in bin/healthcheck" >&2; exit 1; }
 fi
 # Shell-Syntax
 for f in "$STAGE"/*.sh "$STAGE"/bin/*.sh "$STAGE"/cron/cron.01min "$STAGE"/daemon/daemon "$STAGE"/uninstall/uninstall; do
@@ -51,10 +55,10 @@ for d, dirs, files in os.walk(root):
 with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:
     for rel in names:
         data = open(os.path.join(root, rel), 'rb').read()
-        if rel.endswith(('.sh', '.php', '.cfg', '.json', 'apt', 'apt12', 'daemon', 'uninstall')) or rel.startswith('cron/'):
+        if rel.endswith(('.sh', '.php', '.cfg', '.json', 'apt', 'apt12', 'daemon', 'uninstall', 'healthcheck')) or rel.startswith('cron/'):
             data = data.replace(b'\r\n', b'\n')       # Linux: nur LF
         info = zipfile.ZipInfo(rel, (2026, 1, 1, 0, 0, 0))
-        exe = rel.endswith(('.sh', '.php')) or rel in ('daemon/daemon', 'uninstall/uninstall') or rel.startswith('cron/')
+        exe = rel.endswith(('.sh', '.php')) or rel in ('daemon/daemon', 'uninstall/uninstall', 'bin/healthcheck') or rel.startswith('cron/')
         info.external_attr = (0o100755 if exe else 0o100644) << 16
         info.compress_type = zipfile.ZIP_DEFLATED
         z.writestr(info, data)

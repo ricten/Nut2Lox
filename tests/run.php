@@ -293,5 +293,118 @@ check('Passwort nicht per MQTT', str_contains($mlog(), 'testpw1234'), false);
 
 stopProc($nutProc);
 stopProc($mqProc);
+// ---------------------------------------------------------------- Healthcheck (LoxBerry-Healthcheck-Seite)
+$hcDir = $dir . '/hc';
+@mkdir($hcDir . '/run', 0777, true);
+$hc = function (string $arg, ?array $status) use ($php, $root, $hcDir): array {
+    $f = $hcDir . '/run/status.json';
+    @unlink($f);
+    if ($status !== null) {
+        file_put_contents($f, json_encode($status));
+    }
+    $p = proc_open([$php, $root . '/nut2lox/bin/healthcheck', $arg], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, array_merge(getenv(), ['NUT_DEV_DIR' => $hcDir]));
+    $out = (string)stream_get_contents($pipes[1]);
+    $err = (string)stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    $rc = proc_close($p);
+    return [$out, $err, $rc];
+};
+$basis = ['service' => 'running', 'time' => time(), 'mqtt' => 1, 'mqtt_error' => '', 'version' => AppVersion::CURRENT,
+    'server' => ['usv' => ['ok' => true, 'error' => ''], 'garage' => ['ok' => true, 'error' => '']]];
+[$o, $e, $rc] = $hc('title', null);
+check('Healthcheck title', trim($o), 'Nut2Lox: Dienst, MQTT-Broker und USV-Abfrage');
+check('Healthcheck title: Exitcode 0, keine Fehlerausgabe', [$rc, $e], [0, '']);
+check('Healthcheck ohne Argument: keine Ausgabe', $hc('', null)[0], '');
+$res = function (?array $st) use ($hc): array {
+    [$o, $e, $rc] = $hc('check', $st);
+    $j = json_decode($o, true);
+    return [is_array($j) ? $j : ['status' => -1, 'result' => $o], $rc, $e];
+};
+[$j, $rc, $e] = $res(null);
+check('Healthcheck: ohne Status = Fehler 3', $j['status'], 3);
+check('Healthcheck: Dienst laeuft nicht im Text', str_contains($j['result'], 'Der Dienst läuft nicht'), true);
+check('Healthcheck: Exitcode 0, keine Fehlerausgabe', [$rc, $e], [0, '']);
+check('Healthcheck: veralteter Status = Fehler 3', $res(['time' => time() - 120] + $basis)[0]['status'], 3);
+$j = $res(['mqtt' => 0, 'mqtt_error' => 'Verbindung abgelehnt'] + $basis)[0];
+check('Healthcheck: Broker weg = Warnung 4', $j['status'], 4);
+check('Healthcheck: Broker-Grund im Text', str_contains($j['result'], 'Verbindung abgelehnt'), true);
+$j = $res(['server' => []] + $basis)[0];
+check('Healthcheck: nichts eingerichtet = Info 6', $j['status'], 6);
+$j = $res(['server' => ['usv' => ['ok' => true, 'error' => ''], 'weg' => ['ok' => false, 'error' => 'nicht erreichbar']]] + $basis)[0];
+check('Healthcheck: Server ausgefallen = Warnung 4', $j['status'], 4);
+check('Healthcheck: Server im Text', str_contains($j['result'], 'weg (nicht erreichbar)'), true);
+$j = $res($basis)[0];
+check('Healthcheck: alles gut = OK 5', $j['status'], 5);
+check('Healthcheck: Text zaehlt Server und nennt Version', $j['result'], '2 NUT-Server erreichbar, Version ' . AppVersion::CURRENT);
+check('Healthcheck: ohne Logdatei kein logfile', isset($j['logfile']), false);
+file_put_contents($hcDir . '/nut.log', "x\n");
+check('Healthcheck: mit Logdatei der Pfad', $res($basis)[0]['logfile'] ?? null, $hcDir . '/nut.log');
+check('Healthcheck: Ausgabe ist genau eine JSON-Zeile', substr_count(rtrim($hc('check', $basis)[0], "\n"), "\n"), 0);
+
+// ---------------------------------------------------------------- Weboberflaeche mit Attrappen der LoxBerry-Bibliotheken
+// Rendert jeden Reiter (ohne echtes LoxBerry): findet undefinierte Variablen, Syntax- und Laufzeitfehler und prueft Menueleiste,
+// Gateway-Abo und UDP-Port. Nicht pruefbar: das echte Aussehen in LoxBerry.
+$uiDir = $dir . '/ui';
+foreach (['config', 'log', 'data', 'sys', 'dev'] as $sub) {
+    @mkdir("$uiDir/$sub", 0777, true);
+}
+@mkdir("$uiDir/sess", 0777, true);
+$uiPage = function (string $tab, array $env = []) use ($php, $root, $uiDir): array {
+    $e = array_merge(getenv(), [
+        'STUB_INDEX' => $root . '/nut2lox/webfrontend/htmlauth/index.php', 'STUB_BIN' => $root . '/nut2lox/bin', 'STUB_CONFIG' => "$uiDir/config",
+        'STUB_LOG' => "$uiDir/log", 'STUB_DATA' => "$uiDir/data", 'STUB_SYSCONFIG' => "$uiDir/sys", 'NUT_DEV_DIR' => "$uiDir/dev",
+    ], $env);
+    $cmd = [$php, '-d', 'display_errors=1', '-d', 'error_reporting=-1', '-d', 'include_path=' . $root . '/tests/stubs', '-d', 'session.save_path=' . "$uiDir/sess",
+        $root . '/tests/ui_page.php', $tab];
+    $p = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, null, $e);
+    $out = (string)stream_get_contents($pipes[1]);
+    $err = (string)stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    proc_close($p);
+    return [$out, $err];
+};
+$bad = fn(string $o, string $e) => (bool)preg_match('/(Warning|Notice|Fatal error|Deprecated|Parse error|Uncaught)/', $o . $e);
+file_put_contents("$uiDir/sys/general.json", json_encode(['Mqtt' => ['Gatewayversion' => 2, 'Udpinport' => '12345']]));
+file_put_contents("$uiDir/sys/subscriptions.json", json_encode(['Subscriptions' => [['Id' => 'shellies/#']]]));
+file_put_contents("$uiDir/log/test.log", "2026-01-01 <INFO> Testzeile\n");
+foreach (['einstellungen', 'mqtt', 'loxone', 'test', 'logs'] as $tab) {
+    [$o, $e] = $uiPage($tab, ['STUB_UDP' => '12345']);
+    check("UI $tab: ohne PHP-Warnungen und -Fehler", [$bad($o, $e), $e], [false, '']);
+    check("UI $tab: Kopf und Fuss", str_contains($o, '<!--HEADER:') && str_contains($o, '<!--FOOTER-->'), true);
+    preg_match('/<!--NAVBAR:(.*?)-->/', $o, $m);
+    $nav = json_decode($m[1] ?? '[]', true) ?: [];
+    check("UI $tab: Menueleiste mit 5 Eintraegen", count($nav), 5);
+    check("UI $tab: genau ein aktiver Eintrag, und zwar dieser", array_values(array_filter($nav, fn($n) => !empty($n['active'])))[0]['URL'] ?? null, '?tab=' . $tab);
+    check("UI $tab: nur ein aktiver Eintrag", count(array_filter($nav, fn($n) => !empty($n['active']))), 1);
+    check("UI $tab: kein eigener Tab-Block mehr", str_contains($o, '-tabs"'), false);
+}
+[$o] = $uiPage('mqtt', ['STUB_UDP' => '12345']);
+check('UI mqtt: Gateway V2, Abo fehlt, mit Anleitung', str_contains($o, 'Gateway V2: Das Abo „nut/#“ fehlt'), true);
+check('UI mqtt: nichts abonniert = rotes Feld', str_contains($o, 'gw-abo-fehler') && !str_contains($o, 'gw-abo-ok'), true);
+check('UI mqtt: rotes Feld ohne Topic-Liste', str_contains($o, 'gw-abo-fehler') && !str_contains($o, '<ul style="margin:4px 0 0 18px'), true);
+file_put_contents("$uiDir/sys/subscriptions.json", json_encode(['Subscriptions' => [['Id' => 'nut/#']]]));
+[$o] = $uiPage('mqtt', ['STUB_UDP' => '12345']);
+check('UI mqtt: Gateway V2, Abo eingetragen', str_contains($o, 'Gateway V2: eingetragen (nut/#)'), true);
+check('UI mqtt: vollstaendig abonniert = gruenes Feld mit Topic-Liste', str_contains($o, 'gw-abo-ok') && str_contains($o, '<li><code>nut/#</code></li>') && !str_contains($o, 'gw-abo-fehler'), true);
+file_put_contents("$uiDir/sys/subscriptions.json", json_encode(['Subscriptions' => [['Id' => 'nut/status/#']]]));
+[$o] = $uiPage('mqtt');
+check('UI mqtt: nur ein Teil abonniert = gruen (nicht rot)', str_contains($o, 'gw-abo-ok') && !str_contains($o, 'gw-abo-fehler'), true);
+check('UI mqtt: Teil-Abo: Hinweis und Topic aufgelistet', str_contains($o, 'teilweise abonniert (nut/status/#)') && str_contains($o, '<li><code>nut/status/#</code></li>'), true);
+file_put_contents("$uiDir/sys/general.json", json_encode(['Mqtt' => ['Gatewayversion' => 1]]));
+file_put_contents("$uiDir/config/mqtt_subscriptions.cfg", "nut/#\n");
+[$o] = $uiPage('mqtt');
+check('UI mqtt: Gateway V1, Abo in der Datei = gruen', str_contains($o, 'Gateway V1: eingetragen (nut/#)') && str_contains($o, 'gw-abo-ok'), true);
+@unlink("$uiDir/config/mqtt_subscriptions.cfg");
+[$o] = $uiPage('mqtt');
+check('UI mqtt: Gateway V1, Abo-Datei fehlt', str_contains($o, 'Gateway V1: Das Abo'), true);
+[$o] = $uiPage('loxone', ['STUB_UDP' => '12345']);
+preg_match('#/dev/udp/[^/]+/(\d+)#', $o, $um);
+check('UI loxone: UDP-Port aus der Konfiguration statt fest 11884', $um[1] ?? null, '12345');
+
+[$o] = $uiPage('logs');
+check('UI logs: zeigt die Logdatei', str_contains($o, 'Testzeile'), true);
+
 echo "\n$count Pruefungen, $fails Fehler\n";
 exit($fails ? 1 : 0);

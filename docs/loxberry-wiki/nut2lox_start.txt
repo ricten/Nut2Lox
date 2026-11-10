@@ -121,7 +121,7 @@ Schema ''nut/<name>/<wert>'', Zahlen mit Punkt, Zustände 0/1, nicht retained.
 
 ==== 5.1 MQTT-Gateway ====
 
-Das Plugin trägt das Abonnement ''nut/#'' selbst ein. ''nut/status/ok'' und ''nut/status/zaehler'' im Gateway auf **No Cache** stellen.
+Das Abonnement ''nut/#'' trägt das Plugin nur beim **Gateway V1** selbst ein. Das **Gateway V2** liest die Abo-Datei von Plugins nicht: Dort ''nut/#'' **von Hand** im MQTT Gateway unter Abonnements eintragen (das Plugin prüft es im Reiter MQTT). ''nut/status/ok'' und ''nut/status/zaehler'' im Gateway auf **No Cache** stellen.
 
 ==== 5.2 Virtuelle Eingänge ====
 
@@ -135,7 +135,7 @@ Das Gateway ersetzt ''/'' durch ''_'': ''nut/usv/battery_charge'' wird zu ''nut_
 
 ==== 5.3 Befehle ====
 
-Freigabe in den Einstellungen. Virtueller Ausgang: Adresse ''/dev/udp/<LoxBerry-IP>/11884'', Befehl bei EIN ''publish nut/befehl/usv/beeper_toggle 1'' (ohne HTTP-Header/Body). Antwort unter ''nut/befehl/usv/beeper_toggle/quittung'': ''angenommen'', ''ausgefuehrt'' oder ''abgelehnt: <Grund>''.
+Freigabe in den Einstellungen. Virtueller Ausgang: Adresse ''/dev/udp/<LoxBerry-IP>/<UDP-Port>'' (Standard 11884, steht im Plugin im Reiter „Einbindung in Loxone“), Befehl bei EIN ''publish nut/befehl/usv/beeper_toggle 1'' (ohne HTTP-Header/Body). Antwort unter ''nut/befehl/usv/beeper_toggle/quittung'': ''angenommen'', ''ausgefuehrt'' oder ''abgelehnt: <Grund>''.
 
 ===== 6. Tipps & Tricks =====
 

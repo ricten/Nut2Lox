@@ -32,7 +32,7 @@ Siehe [Lokaler NUT-Server](Lokaler-NUT-Server).
 
 ## MQTT
 
-Oben der Status: verwendeter Broker (LoxBerry oder eigener), Gateway-Abo, Dienst- und Verbindungsstatus, Zustand jedes NUT-Servers sowie `status/ok`, `status/zaehler` und `status/ts`. Darunter die Broker-Einstellungen.
+Oben der Status: verwendeter Broker (LoxBerry oder eigener), Gateway-Abo, Dienst- und Verbindungsstatus, Zustand jedes NUT-Servers sowie `status/ok`, `status/zaehler` und `status/ts`. Darunter die Broker-Einstellungen. Das **Gateway-Abo** steht als farbiges Feld oben im Reiter: **grün**, sobald mindestens ein passendes Abo im MQTT Gateway eingetragen ist (ist nur ein Teil der Topics abonniert, steht ein Hinweis dabei), **rot** nur, wenn keines eingetragen ist. Die eingetragenen Abos werden darunter aufgelistet.
 
 ### MQTT-Broker (eigener Broker)
 
@@ -57,7 +57,7 @@ Tabelle aller Topics mit Eingangsname, Einheit, Bedeutung und retained-Angabe, d
 | Aktion | Wirkung |
 |---|---|
 | Sofort abrufen | Liest alle Variablen der konfigurierten Server und zeigt Variable, Topic und Wert |
-| Selbstprüfung | Prüft Konfiguration, NUT-Server (und Anmeldung, falls Benutzer eingetragen), Broker, Gateway-Abo, Dienst und Befehlsbrücke (UDP 11884) |
+| Selbstprüfung | Prüft Konfiguration, NUT-Server (und Anmeldung, falls Benutzer eingetragen), Broker, Gateway-Abo, Dienst und Befehlsbrücke (UDP-Port des Gateways) |
 | Dienst neu starten | Beendet und startet den Dienst |
 
 ## Logdateien

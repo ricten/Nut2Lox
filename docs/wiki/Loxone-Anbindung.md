@@ -4,7 +4,7 @@ Der Weg: **NUT-Server → Nut2Lox → LoxBerry-MQTT-Broker → LoxBerry-MQTT-Gat
 
 ## 1. MQTT-Gateway einrichten
 
-Das Plugin trägt sein Abonnement `nut/#` selbst in `mqtt_subscriptions.cfg` ein. Im **MQTT Gateway** prüfen, dass es unter „Abonnements“ erscheint. Mit **eigenem Broker** (Reiter MQTT) bekommt der Miniserver die Werte nur, wenn das Gateway diesen Broker abonniert.
+**Abonnement `nut/#` im MQTT Gateway:** Beim **Gateway V1** (Perl) trägt das Plugin es über die Datei `mqtt_subscriptions.cfg` selbst ein (eine Zeile je Topic). Das **Gateway V2** (Python) liest diese Datei nicht (LoxBerry-Quellcode): Dort das Abo **von Hand** im MQTT Gateway unter „Abonnements“ eintragen: `nut/#`. Das Plugin prüft im Reiter *MQTT* und in der Selbstprüfung, ob es eingetragen ist. Mit **eigenem Broker** (Reiter MQTT) bekommt der Miniserver die Werte nur, wenn das Gateway diesen Broker abonniert.
 
 Für Lebenszeichen und Fehlererkennung die Topics `nut/status/ok` und `nut/status/zaehler` im Gateway auf **No Cache** stellen.
 
@@ -39,11 +39,11 @@ Virtueller Ausgang in Loxone Config:
 
 | Feld | Wert |
 |---|---|
-| Adresse | `/dev/udp/<LoxBerry-IP>/11884` |
+| Adresse | `/dev/udp/<LoxBerry-IP>/<UDP-Port>` |
 | Befehl bei EIN | `publish nut/befehl/usv/beeper_toggle 1` |
 | Trennzeichen / HTTP | leer, **ohne** HTTP-Header/Body |
 
-`11884` ist der Befehlseingang des MQTT-Gateways (UDP). Die Antwort steht unter `nut/befehl/usv/beeper_toggle/quittung` (nie retained):
+`<UDP-Port>` ist der Befehlseingang des MQTT-Gateways (UDP, Standard 11884; der Port ist einstellbar und steht im Plugin im Reiter „Einbindung in Loxone“). Die Antwort steht unter `nut/befehl/usv/beeper_toggle/quittung` (nie retained):
 
 | Quittung | Bedeutung |
 |---|---|

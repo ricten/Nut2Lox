@@ -4,7 +4,7 @@
  * Ausserhalb von LoxBerry (Entwicklung/Tests) greift NUT_DEV_DIR als Basisverzeichnis.
  * Util, Logger und MqttClient kommen aus ../common/php (build.sh kopiert sie nach bin/lib).
  */
-foreach (['Util', 'Logger', 'MqttClient', 'NutClient', 'NutConfig', 'AppVersion'] as $cls) {
+foreach (['Util', 'Logger', 'MqttClient', 'GatewayInfo', 'NutClient', 'NutConfig', 'AppVersion'] as $cls) {
     // im ZIP liegt alles in bin/lib; im Quellbaum kommen die gemeinsamen Klassen aus ../common/php
     $f = __DIR__ . '/' . $cls . '.php';
     require_once is_file($f) ? $f : __DIR__ . '/../../../../common/php/' . $cls . '.php';

@@ -76,11 +76,20 @@ $alter = isset($status['time']) ? time() - (int)$status['time'] : null;
 $laeuft = $alter !== null && $alter <= 10;
 $basis = '?tab=';
 
+$tabs = ['einstellungen' => 'Einstellungen USV/NUT', 'mqtt' => 'MQTT', 'loxone' => 'Einbindung in Loxone', 'test' => 'Test', 'logs' => 'Logdateien'];
+// Menüleiste der LoxBerry-Oberfläche: $navbar muss vor lbheader() definiert sein
+$navbar = [];
+$nr = 10;
+foreach ($tabs as $k => $t) {
+    $navbar[$nr] = ['Name' => $t, 'URL' => $basis . $k] + ($tab === $k ? ['active' => true] : []);
+    $nr += 10;
+}
+// UDP-Port des Gateways für Befehle aus Loxone (einstellbar, steht in den MQTT-Verbindungsdaten)
+$udp = GatewayInfo::udpPort(function_exists('mqtt_connectiondetails') ? mqtt_connectiondetails() : null, GatewayInfo::general());
+
 LBWeb::lbheader('Nut2Lox ' . AppVersion::CURRENT, '', '');
 ?>
 <style>
- .nut-tabs a { display:inline-block; padding:6px 14px; margin:0 4px 8px 0; border:1px solid #999; border-radius:4px; text-decoration:none; color:inherit; }
- .nut-tabs a.aktiv { background:#6dac20; color:#fff; border-color:#6dac20; }
  .nut table { border-collapse:collapse; margin:8px 0 16px 0; }
  .nut th, .nut td { border:1px solid #bbb; padding:4px 8px; text-align:left; vertical-align:top; }
  .nut pre { background:#f4f4f4; color:#222; padding:8px; overflow:auto; max-height:420px; }
@@ -91,14 +100,6 @@ LBWeb::lbheader('Nut2Lox ' . AppVersion::CURRENT, '', '');
  .nut input.nut-chk { display:inline-block; position:static; opacity:1; width:22px; height:22px; margin:4px; }
 </style>
 <div class="nut">
-<div class="nut-tabs">
-<?php
-$tabs = ['einstellungen' => 'Einstellungen USV/NUT', 'mqtt' => 'MQTT', 'loxone' => 'Einbindung in Loxone', 'test' => 'Test', 'logs' => 'Logdateien'];
-foreach ($tabs as $k => $t) {
-    echo '<a href="' . $basis . $k . '" class="' . ($tab === $k ? 'aktiv' : '') . '" data-ajax="false">' . h($t) . '</a>';
-}
-?>
-</div>
 <?php foreach ($meldungen as $m) { echo '<p class="' . (str_starts_with($m, 'FEHLER') ? 'fehler' : 'ok') . '">' . h($m) . '</p>'; } ?>
 <?php if ($ausgabe !== '') { echo '<pre>' . h($ausgabe) . '</pre>'; } ?>
 
@@ -175,12 +176,12 @@ Bestehende Dateien werden einmalig als *.vor-nut-plugin gesichert. Ist die Optio
 <?php } elseif ($tab === 'mqtt') {
     $own = NutConfig::ownBroker($nut);
     $d = $own !== null ? ['brokerhost' => $own[0], 'brokerport' => $own[1]] : (function_exists('mqtt_connectiondetails') ? mqtt_connectiondetails() : []);
-    $abo = is_file(LBPCONFIGDIR . '/mqtt_subscriptions.cfg');
+    $gw = GatewayInfo::subscription('nut/#', GatewayInfo::general());
     ?>
 <h3>MQTT</h3>
 <table>
 <tr><th><?= $own !== null ? 'Broker (eigener, aus den Plugin-Einstellungen)' : 'Broker (aus der LoxBerry-Konfiguration)' ?></th><td><?= h(($d['brokerhost'] ?? '?') . ':' . ($d['brokerport'] ?? '?')) ?></td></tr>
-<tr><th>Gateway-Abo</th><td>nut/# <?= $abo ? '<span class="ok">hinterlegt</span>' : '<span class="fehler">fehlt</span>' ?></td></tr>
+<tr><th>Gateway-Abo</th><td><?= GatewayInfo::feldHtml($gw, 'nut/#') ?></td></tr>
 <tr><th>Dienst</th><td><?= $laeuft ? '<span class="ok">läuft</span> (Version ' . h($status['version'] ?? '?') . ')' : '<span class="fehler">läuft nicht</span> (der Wächter startet ihn spätestens nach einer Minute)' ?></td></tr>
 <tr><th>Broker-Verbindung des Dienstes</th><td><?= !empty($status['mqtt']) ? '<span class="ok">verbunden</span>' : '<span class="fehler">getrennt</span> ' . h($status['mqtt_error'] ?? '') ?></td></tr>
 <tr><th>status/ok</th><td><?= isset($status['ok']) ? (int)$status['ok'] : '-' ?></td></tr>
@@ -263,7 +264,7 @@ foreach ([['nut/status/ok', '0/1', 'Letzter Durchgang erfolgreich (No Cache)'], 
 <p class="hinweis">Beim Absturz des Dienstes setzt der Broker nut/status/ok per Letzter-Wille-Nachricht auf 0 (retained).</p>
 
 <h3>Befehle aus Loxone</h3>
-<p>Gesperrt, bis in den Einstellungen freigegeben. Virtueller Ausgang: Adresse <code>/dev/udp/&lt;LoxBerry-IP&gt;/11884</code>,
+<p>Gesperrt, bis in den Einstellungen freigegeben. Virtueller Ausgang: Adresse <code>/dev/udp/&lt;LoxBerry-IP&gt;/<?= (int)$udp ?></code>,
 Befehl bei EIN <code>publish nut/befehl/&lt;name&gt;/&lt;befehl&gt; 1</code> (ohne HTTP-Header/Body, Trennzeichen leer).</p>
 <table>
 <tr><th>Topic</th><th>Wirkung</th></tr>
@@ -350,15 +351,16 @@ foreach ($aliase as $a) {
         $okm = $mq->connect();
         $zeile('Broker', $okm, $okm ? 'Verbindung möglich' : $mq->lastError());
         $mq->close();
-        $zeile('Gateway-Abo', is_file(LBPCONFIGDIR . '/mqtt_subscriptions.cfg'), 'nut/# in mqtt_subscriptions.cfg');
+        $gw = GatewayInfo::subscription('nut/#', GatewayInfo::general());
+        $zeile('Gateway-Abo', $gw['state'] === 'ok', $gw['text']);
         $zeile('Dienst', $laeuft, $laeuft ? 'läuft, letzte Statusmeldung vor ' . $alter . ' s' : 'keine aktuelle Statusmeldung');
-        $sock = @stream_socket_client('udp://127.0.0.1:11884', $en, $es, 2);
+        $sock = @stream_socket_client('udp://127.0.0.1:' . $udp, $en, $es, 2);
         if ($sock) {
             $sent = @fwrite($sock, 'publish nut/status/bruecketest 1');
             fclose($sock);
-            $zeile('Befehlsbrücke (UDP 11884)', $sent > 0, 'Testnachricht an nut/status/bruecketest gesendet (UDP liefert keine Antwort)');
+            $zeile('Befehlsbrücke (UDP ' . $udp . ')', $sent > 0, 'Testnachricht an nut/status/bruecketest gesendet (UDP liefert keine Antwort)');
         } else {
-            $zeile('Befehlsbrücke (UDP 11884)', false, 'Socket nicht möglich: ' . $es);
+            $zeile('Befehlsbrücke (UDP ' . $udp . ')', false, 'Socket nicht möglich: ' . $es);
         }
         echo '</table>';
     }
