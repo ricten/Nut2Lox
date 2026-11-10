@@ -25,7 +25,7 @@ ich habe ein LoxBerry-Plugin gebaut, das die Werte einer **USV** über **NUT** (
 
 1. ZIP von der Release-Seite herunterladen und in der Plugin-Verwaltung installieren.
 2. Im Plugin den NUT-Server (Host) eintragen, **Aktiv** anhaken, speichern. Oder: „Lokalen NUT-Server einrichten“ für eine USB-USV.
-3. Im MQTT-Gateway ist `nut/#` bereits abonniert. Die virtuellen Eingänge heißen z. B. `nut_usv_battery_charge`, `nut_usv_zustand_batterie`.
+3. Im MQTT Gateway das Abo `nut/#` eintragen. Beim Gateway V1 macht das die Abo-Datei des Plugins, beim **Gateway V2** muss es von Hand unter „Abonnements“ stehen (der Reiter MQTT zeigt, ob es eingetragen ist). Die virtuellen Eingänge heißen z. B. `nut_usv_battery_charge`, `nut_usv_zustand_batterie`.
 
 *[Screenshot: Plugin-Oberfläche mit Erreichbarkeitsanzeige]*
 

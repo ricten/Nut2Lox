@@ -12,7 +12,7 @@
 ^ Quellcode | [[https://github.com/ricten/Nut2Lox|github.com/ricten/Nut2Lox]] (MIT-Lizenz) |
 ^ Beschreibung | Liest USV-Werte über das NUT-Protokoll (Network UPS Tools) aus und veröffentlicht sie per MQTT. Über das LoxBerry-MQTT-Gateway gelangen sie an den Loxone Miniserver. Optional richtet das Plugin einen NUT-Server für eine USB-USV am LoxBerry ein, auch für eine Synology DiskStation als Client. |
 ^ Sprachen | DE |
-^ Diskussion | FORUM-LINK-EINTRAGEN |
+^ Diskussion | https://www.loxforum.com/forum/projektforen/loxberry/plugins/494953-loxberry-plugin-nut2lox-%E2%80%93-usv-werte-nut-per-mqtt-an-den-miniserver |
 
 ----
 

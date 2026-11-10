@@ -6,7 +6,7 @@ Konfiguration, Referenz, Miniserver-Anbindung, FAQ, Changelog).
 
 ## Vor dem Einstellen anpassen
 
-- `FORUM-LINK-EINTRAGEN` (zweimal): Link zum Forenbeitrag des Plugins.
+- Der Link zum Forenbeitrag steht schon in der Zeile „Diskussion“ der Plugin-Daten (bei einem neuen Beitrag dort anpassen).
 - Bild `plugins:nut2lox:nut2lox.png`: Datei `docs/logo/nut2lox.png` im Medien-Manager des Wikis hochladen
   (Namensraum `plugins:nut2lox`).
 - Das Feld **Status** („BETA“) und **Min. LB Version** („4.0“) prüfen. Die Version steht in `nut2lox/plugin.cfg`.
