@@ -1,6 +1,6 @@
 # Nut2Lox
 
-![Logo](../logo/logo_loxberry.png)
+![Logo](../logo/nut2lox.png)
 
 **Nut2Lox** ist ein LoxBerry-Plugin, das die Werte einer USV (unterbrechungsfreie Stromversorgung) über das **NUT-Protokoll** (Network UPS Tools, Port 3493) ausliest und an den MQTT-Broker des LoxBerry veröffentlicht.
 Über das LoxBerry-MQTT-Gateway gelangen die Werte an den Loxone Miniserver. Es ersetzt den ioBroker-Adapter `nut`.

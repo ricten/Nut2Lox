@@ -1,5 +1,5 @@
 # Nut2Lox – LoxBerry-Plugin
-<img src="docs/logo/logo_loxberry.png" alt="Nut2Lox Logo" width="128">
+<img src="docs/logo/nut2lox.png" alt="Nut2Lox Logo" width="128">
 
 **Version 0.8.0** · Benötigt LoxBerry 4 (PHP ≥ 8.4) · [Changelog](CHANGELOG.md)
 

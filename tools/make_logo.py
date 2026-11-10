@@ -4,7 +4,7 @@ Aufruf (aus dem Repo-Ordner):  python tools/make_logo.py
 Benoetigt Pillow. Schrift: Arial Bold (Windows) bzw. DejaVu Sans Bold.
 
 Ausgabe:
-  docs/logo/logo_loxberry.png                 gruener, runder LoxBerry-Stil
+  docs/logo/nut2lox.png                 gruener, runder LoxBerry-Stil
   nut2lox/icons/icon_{64,128,256,512}.png     dasselbe als Plugin-Icons
 
 Links eine Rack-USV (19 Zoll, Display mit Blitz), rechts der Miniserver (eigene, vereinfachte Darstellung
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     icon_dir = os.path.join(ROOT, "nut2lox", "icons")
     os.makedirs(logo_dir, exist_ok=True)
     os.makedirs(icon_dir, exist_ok=True)
-    render(512).save(os.path.join(logo_dir, "logo_loxberry.png"))
+    render(512).save(os.path.join(logo_dir, "nut2lox.png"))
     for s in (64, 128, 256, 512):
         render(s).save(os.path.join(icon_dir, "icon_%d.png" % s))
     print("Logo und Icons geschrieben")

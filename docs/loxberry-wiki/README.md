@@ -7,7 +7,7 @@ Konfiguration, Referenz, Miniserver-Anbindung, FAQ, Changelog).
 ## Vor dem Einstellen anpassen
 
 - `FORUM-LINK-EINTRAGEN` (zweimal): Link zum Forenbeitrag des Plugins.
-- Bild `plugins:nut2lox:logo_loxberry.png`: Datei `docs/logo/logo_loxberry.png` im Medien-Manager des Wikis hochladen
+- Bild `plugins:nut2lox:nut2lox.png`: Datei `docs/logo/nut2lox.png` im Medien-Manager des Wikis hochladen
   (Namensraum `plugins:nut2lox`).
 - Das Feld **Status** („BETA“) und **Min. LB Version** („4.0“) prüfen. Die Version steht in `nut2lox/plugin.cfg`.
 - Bei jedem Release die Felder **Version** und **Release Download** sowie die Changelog-Tabelle aktualisieren.

@@ -3,7 +3,7 @@
 ===== Plugin-Daten =====
 
 ^ Autor | Rico Tengler |
-^ Logo | {{:plugins:nut2lox:logo_loxberry.png?64|Nut2Lox}} |
+^ Logo | {{:plugins:nut2lox:nut2lox.png?64|Nut2Lox}} |
 ^ Status | BETA |
 ^ Version | 0.8.0 |
 ^ Min. LB Version | 4.0 (benötigt PHP 8.4) |
