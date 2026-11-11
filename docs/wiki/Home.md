@@ -29,7 +29,7 @@
 ## Voraussetzungen
 
 - LoxBerry ≥ 4.0 mit aktivem MQTT-Broker (Mosquitto) und MQTT-Gateway (oder eigener Broker)
-- PHP ≥ 8.4 (CLI + Web, ist bei LoxBerry 4 dabei)
+- PHP ≥ 8.2 (CLI + Web, ist bei LoxBerry 4 dabei)
 - Ein erreichbarer NUT-Server **oder** eine USV per USB am LoxBerry
 
 ## Lizenz

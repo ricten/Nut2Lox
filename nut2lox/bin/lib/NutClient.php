@@ -3,7 +3,7 @@
 final class NutClient
 {
     /** Erlaubte Befehle (Name im Topic mit "_" statt "."). Alles andere (shutdown.*, load.off ...) wird abgelehnt. */
-    public const string CMD_ALLOWED = '/^(beeper\.(enable|disable|mute|toggle)|test\.(battery\.(start(\.quick|\.deep)?|stop)|panel\.(start|stop)))$/';
+    public const CMD_ALLOWED = '/^(beeper\.(enable|disable|mute|toggle)|test\.(battery\.(start(\.quick|\.deep)?|stop)|panel\.(start|stop)))$/';
 
     /** @var resource|null */
     private $fp = null;

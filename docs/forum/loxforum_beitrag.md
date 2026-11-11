@@ -18,7 +18,7 @@ ich habe ein LoxBerry-Plugin gebaut, das die Werte einer **USV** über **NUT** (
 
 **Voraussetzungen**
 
-- LoxBerry 4.0 (PHP 8.4) mit MQTT-Broker bzw. MQTT-Gateway
+- LoxBerry 4.0 (PHP 8.2 oder neuer) mit MQTT-Broker bzw. MQTT-Gateway
 - ein erreichbarer NUT-Server **oder** eine USV per USB am LoxBerry
 
 **Installation in drei Schritten**

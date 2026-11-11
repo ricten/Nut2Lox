@@ -2,7 +2,7 @@
 /** Konfiguration des Plugins (nut.json, Rechte 0600) und lokales Root-Konfigfile (lokal.conf). */
 final class NutConfig
 {
-    public const array TREIBER = ['usbhid-ups', 'blazer_usb', 'nutdrv_qx', 'richcomm_usb', 'tripplite_usb', 'riello_usb', 'bcmxcp_usb'];
+    public const TREIBER = ['usbhid-ups', 'blazer_usb', 'nutdrv_qx', 'richcomm_usb', 'tripplite_usb', 'riello_usb', 'bcmxcp_usb'];
 
     public static function defaultServer(string $alias = ''): array
     {
