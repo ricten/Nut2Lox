@@ -9,8 +9,15 @@ final class NutClient
     private $fp = null;
     public string $error = '';
 
-    public function __construct(private readonly string $host, private readonly int $port = 3493, private readonly int $timeout = 4)
+    private string $host;
+    private int $port;
+    private int $timeout;
+
+    public function __construct(string $host, int $port = 3493, int $timeout = 4)
     {
+        $this->host = $host;
+        $this->port = $port;
+        $this->timeout = $timeout;
     }
 
     public function connect(): bool
@@ -40,7 +47,7 @@ final class NutClient
         @fwrite($this->fp, $line . "\n");
     }
 
-    private function readLine(): string|false
+    private function readLine()
     {
         $l = @fgets($this->fp, 4096);
         return $l === false ? false : rtrim($l, "\r\n");
